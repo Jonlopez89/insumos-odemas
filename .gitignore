@@ -1,0 +1,59 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploaded evidence (local dev)
+storage/
+uploads/
+
+# Initial data catalogs — NEVER commit real PII
+# Only the README and explicit *.sample.* files may live in data/initial/
+data/initial/*
+!data/initial/README.md
+!data/initial/*.sample.csv
+!data/initial/*.sample.xlsx
+!data/initial/.gitkeep
+
+# Cachés y archivos temporales de BMAD
+.bmad/cache/
+.bmad/temp/
+.bmad-core/cache/
+.bmad-core/temp/
+.bmad-core/snapshots/
+bmad-output/
+bmad-artifacts/
+_bmad/
+
+# Personalización individual (no del equipo)
+_bmad/custom/*.user.toml
+
+# Carpetas de configuración de herramientas de IA (personales por dev)
+.claude
+.cursor
+.codex
+.windsurf
+.roo
+.trae
+.kiro
+.augment/
+.github/chatmodes
+.github/agents
+docs/contextodata/*
