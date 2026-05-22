@@ -1,8 +1,8 @@
 ---
 project_name: 'insumos-odemas'
 user_name: 'Jonathan'
-date: '2026-05-20'
-sections_completed: ['discovery', 'technology_stack', 'language_and_quality']
+date: '2026-05-22'
+sections_completed: ['discovery', 'technology_stack', 'language_and_quality', 'data_inputs']
 existing_patterns_found: 0
 ---
 
@@ -156,3 +156,104 @@ El equipo puede divergir de este patrón si la justificación queda registrada e
 - **Tipos exactos:** `NUMERIC(p,s)` para montos (no `FLOAT`/`REAL`). `BIGINT` para cantidades. `TIMESTAMPTZ` para fechas con hora; `DATE` para fechas puras.
 - **Schemas separados:** `raw` (CSVs cargados sin transformación), `staging` (limpios/validados), `mart` (presentación). Sin esto, debugging del pipeline es imposible.
 - **Migrations:** Flyway o Liquibase (decisión en `architecture.md`). Una migration por PR. NUNCA editar migrations ya aplicadas — se crea una nueva.
+
+---
+
+## Insumos de datos (CSV/XLSX en `docs/`)
+
+### Inventario canónico
+
+Los siguientes archivos son la fuente de verdad para el pipeline. Sus nombres, columnas y formatos pueden cambiar — cualquier cambio se registra aquí antes de modificar código.
+
+| Archivo | Rol | Cardinalidad |
+|---|---|---|
+| `Cruce-de-skus-venta-insumo.xlsx` | Equivalencia venta↔insumo (autoridad) | 1 SKU venta → 1 SKU insumo |
+| `historico-de-ventas-2024-2025-2026.csv` | Histórico de ventas por tienda/mes/SKU | grano: (year, month, item_id_venta, location_key) |
+| `Skus_insumos.csv` | Catálogo de SKUs de insumo (lo que se compra a proveedor) | 1 fila por `SkuInsumo` |
+| `Presupuesto-tiendas.csv` | Ventana presupuestal y periodicidad de pedido por tienda | 1 fila por tienda |
+| `ALLOC_2026_04_27.csv` | Órdenes de surtido WH → tienda | snapshot fechado |
+| `TFS_2026_04_27.csv` | Transferencias entre tiendas | snapshot fechado |
+| `Entrega-directa-tienda.csv` | Compras y transferencias directas registradas en tienda | snapshot fechado |
+
+Los archivos ALLOC/TFS/Entrega vienen con sufijo de fecha (`*_YYYY_MM_DD.csv`). El parser debe descubrirlos por patrón, no por nombre fijo.
+
+### Modelo de cruce de SKU (decisión registrada)
+
+`item_id_venta` (en `historico-de-ventas-*.csv`) y `sku_venta_id` (en `Cruce-de-skus-venta-insumo.xlsx`) son **el mismo identificador**, solo nombrado distinto por origen. El join autoritativo del pipeline es:
+
+```
+historico.item_id_venta  =  cruce.sku_venta_id  →  cruce.sku_insumo  =  Skus_insumos.SkuInsumo
+```
+
+`sku_insumo` es el código del artículo **comprable al proveedor** (caja/paquete/etc). Es el SKU sobre el que se cuantiza y se aplica el empaque mínimo.
+
+La columna `sku_venta` del histórico (ej. `54693`) coincide a veces directamente con `SkuInsumo` — esto es un mapeo embebido por el equipo de datos, **no se usa como autoridad**. Se ignora salvo para conciliación de auditoría.
+
+**Invariante (fail-loud):**
+- Todo `item_id_venta` del histórico debe encontrarse en `Cruce-de-skus-venta-insumo.xlsx.sku_venta_id`. Si no → `EquivalenciaNoDefinidaException`, abortar ciclo de esa tienda. NUNCA inferir ni interpolar.
+
+### Reglas de parseo por archivo
+
+**`historico-de-ventas-2024-2025-2026.csv`**
+
+- Periodo expresado como `(year, month)` enteros — NO `dd/MM/yyyy`. Reconstruir a `YearMonth` o primer día del mes según necesidad.
+- `item_id_venta` y `sku_venta`: tratar como `String` aunque parezcan numéricos.
+- `location_key` (entero): mapea a `Tienda.id`. String en dominio.
+- `sales_quantity` y `tickets`: `long`. `sales_amount`: `BigDecimal(scale=4)`.
+
+**`Cruce-de-skus-venta-insumo.xlsx`**
+
+- Columnas: `sku_venta_id` (String) ↔ `sku_insumo` (String).
+- Es XLSX, no CSV. Decisión pendiente de arquitectura: convertir a CSV en pipeline de ingesta o leer XLSX directo. Registrar la decisión en `architecture.md`.
+
+**`Skus_insumos.csv`**
+
+- Cabecera literal `"Matarial y tamaño"` (typo de origen). **Mapeo conservador**: el POJO usa exactamente `"Matarial y tamaño"` como nombre de columna en el parser. Si el equipo de datos corrige el typo, el parser debe fallar (es un cambio de contrato, no una mejora silenciosa).
+- `Presentación` ∈ {`PAQUETE`, `CAJA C/Xp_Ypz`, ...}. `Contenido` = piezas por presentación (`long`). Cuantización opera sobre `Contenido` como múltiplo mínimo.
+- `Costo`: `BigDecimal(scale=4)`, MXN.
+
+**`Presupuesto-tiendas.csv`**
+
+- `Cantidad por semana` viene como string `"$82,000"` (símbolo + miles con coma + comillas para escapar). Parser dedicado: strip `$`, strip `,`, → `BigDecimal(scale=2)`.
+- `Semana que debe solicitar` viene en lenguaje natural (`"Solicitan insumo semana 1 y 3"`). Se modela como **`List<Integer>` de números de semana ISO 8601**:
+  - `"semana 1 y 3"` → `[1, 3]`
+  - `"semana 2 y 4"` → `[2, 4]`
+  - Cualquier patrón no reconocido → `PeriodicidadPresupuestoIndefinidaException`, fail-loud.
+- `Distrito` y `Tienda`: `String`.
+
+**`ALLOC_*.csv`**
+
+- `RELEASE_DATE` y `FECHA_DE_VIGENCIA_OC`: formato `dd/MM/yyyy`.
+- `FECHA_CREATION_DATE_ORDEN`: formato `dd/MM/yyyy HH:mm` (con hora). La misma columna puede contener ambos formatos en distintas filas — parser dual con fallback ordenado.
+- `papalEspacial` (sic, typo en origen): admite `""` legítimo. NO colapsar a `null`.
+- `STATUS` y `STATUS_ORDEN`: **glosario pendiente** (ver "Riesgos abiertos").
+- `WH`: warehouse id (`String`). `TO_LOC`: tienda destino (`String`).
+- Cantidades (`QTY_ALLOCATED`, `QTY_TRANSFERRED`, `QTY_RECEIVED`, `CTD_PENDIENTE`): `long`. Invariante: `QTY_ALLOCATED = QTY_TRANSFERRED + CTD_PENDIENTE` (validar en parsing; si no se cumple, registrar warning con MDC poblado).
+
+**`TFS_*.csv`**
+
+- `CREATE_DATE` mezcla `dd/MM/yyyy` y `dd/MM/yyyy HH:mm` en la misma columna entre filas. Parser dual obligatorio.
+- `FROM_LOC` y `TO_LOC`: `String` (pueden ser warehouse o tienda, no asumir por rango numérico).
+- `STATUS` ∈ {A, I, S, ...}: **glosario pendiente**.
+- Trailing comma en la cabecera (`STATUS,`); el último campo (`-`) parece ser placeholder. Documentar y descartar en el mapeo.
+
+**`Entrega-directa-tienda.csv`**
+
+- `TRAN_DATE` y `POST_DATE`: formato `dd/MM/yyyy`.
+- `TRAN_CODE` ∈ {20=`Purchases`, 30=`Transfers In`, ...}: el archivo trae también la columna `DECODE` que ya descodifica el `TRAN_CODE`. **Usar `DECODE` como autoridad** y validar contra `TRAN_CODE` (fail-loud si difieren).
+- `SUPPLIER`: `String` aunque parezca numérico.
+- `STORE_NAME` incluye prefijo `"NN-NombreTienda"`. Para joins usar `LOCATION` (numérico → String), nunca `STORE_NAME`.
+- `TOTAL_COST` y `TOTAL_RETAIL`: `BigDecimal(scale=4)`.
+
+### Encoding y CSV dialect (transversal)
+
+- Encoding: intentar UTF-8 BOM (`utf-8-sig`) primero, fallback `cp1252`. Loguear encoding detectado por archivo en MDC.
+- Delimitador: coma. Comillas para escapar (`Presupuesto-tiendas.csv` lo demuestra con `"$82,000"`).
+- Separador decimal: punto en CSVs revisados. Los XLSX pueden traer coma — muestrear antes de parsear.
+
+### Riesgos abiertos (registrar, no resolver en código)
+
+1. **Glosario `TRAN_CODE` y `STATUS`** (ALLOC.STATUS, ALLOC.STATUS_ORDEN, TFS.STATUS, Entrega.TRAN_CODE/DECODE): no existe diccionario formal en `docs/`. Política provisional: el parser conserva el código crudo como `String`. Cualquier consumidor que necesite ramificar lógica por status debe llamar a un método `interpretarStatus(...)` central; si el valor recibido no está en la lista conocida → `StatusDesconocidoException`, fail-loud. Pendiente: pedir glosario oficial al equipo de operaciones.
+2. **Conversión XLSX→CSV de `Cruce-de-skus-venta-insumo.xlsx`**: decisión pendiente en `architecture.md`. Mientras tanto, el archivo se trata como input directo XLSX.
+3. **Doble identificador en histórico (`item_id_venta` vs `sku_venta`)**: el segundo es un mapeo embebido del equipo de datos. Si en algún ciclo diverge respecto al cruce autoritativo, se loguea como anomalía pero no se aborta — el join autoritativo gana.
+4. **Lock files de Excel**: `docs/~$*.xlsx` aparece cuando un .xlsx está abierto en Excel. Agregar `~$*.xlsx` a `.gitignore` para evitar commits accidentales.
