@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <title>PRD Validation: insumos-odemas</title>
@@ -203,21 +203,21 @@
 
     <header class="report-header">
       <div class="title">
-        <h1>insumos-odemas — Validation Report</h1>
-        <div class="subtitle">_producto/planning-artifacts/prds/prd-insumos-odemas-2026-05-22/prd.md</div>
+        <h1>insumos-odemas — Reporte de Validación del PRD</h1>
+        <div class="subtitle">_producto/planning-artifacts/prds/prd-insumos-odemas-2026-05-22/prd.md · status: draft · revisores: rúbrica de calidad</div>
       </div>
       <div class="grade grade-fair">Fair</div>
     </header>
 
     <div class="synthesis">
-      <p>Después de cuatro iteraciones en 24 horas el PRD llega a un punto inusual de coherencia narrativa para un documento todavía en <code>draft</code>: la tesis es nombrable en una frase, la concesión epistémica central (operar sobre SIM sucio sin sanearlo) está declarada cinco veces de formas consistentes, y la decisión más resbalosa —qué hacer con la pérdida invisible— se reescribió desde "factor seedeado desde histórico" a "default = 0 + configuración manual progresiva a discreción del coord", lo cual es una rara muestra de scope honesto bajando expectativas en lugar de subirlas. El PRD subió desde "Poor" en la corrida anterior hacia algo equivalente a "Good con bloqueos externos documentados".</p>
-      <p>Lo que sostiene el documento son §10.4 (modelo SIM (C) con objeción de Winston textualmente preservada), §8.9 (modelo dual de pérdida bien estructurado), §6 (métricas y contra-métricas calibradas a la fase) y §11 (out-of-scope detallado con tratamiento de cada exclusión). Lo que sigue poniéndolo en riesgo como input para <code>architecture.md</code> son: (a) tres bloqueos Reviewer Gate todavía abiertos (R-7 MAPE, R-8 spike Java, R-9 backtesting + pilot baselines), correctamente documentados como acciones externas no decisiones de scope; (b) un sub-riesgo aceptado por el owner (sistema arranca con todo en 0) que delega la calidad inicial del forecast a detección residual + overrides, sin gate operacional; (c) algunos huecos de definición todavía vivos: FR-061 "Excel capturado o ingresado" sin aclarar el mecanismo de entrada, FR-066 paso 4 sin regla cerrada para el presupuesto en carry-over, OQ-106 reformulación huérfana porque el histórico ya no se ingesta, y OQ-120 mecanismo de atribución residual abierta. El grade <strong>Fair</strong> deriva mecánicamente de los 3 findings altos; ninguna dimensión está broken ni thin.</p>
+      <p>PRD inusualmente honesto y bien argumentado para su etapa: la tesis (<em>automatizar la consolidación distrital del coordinador, no atacar la causa raíz del dato sucio</em>) está nombrada, las concesiones epistémicas están expuestas sin maquillaje (§10.4, §11.16, R-1, R-11 reconocen textualmente que el modelo (C) "vigila pero no previene" la divergencia que Winston nombró), y la reversa D-9 al factor único de pérdida está bien propagada en el cuerpo principal. Cuatro de siete dimensiones son <strong>strong</strong> (Decision-readiness, Substance, Strategic coherence, Shape fit), pero la calificación queda en <strong>Fair</strong> por tres hallazgos high.</p>
+      <p>Lo que está en riesgo es la <strong>done-ness de los FR del motor</strong> (FR-030..035, FR-040 mezclan condición verificable con decisiones diferidas a <code>architecture.md</code> sin criterio de aceptación propio) y la <strong>scope honesty de cara a un go-live</strong>: FR-066 paso 4 es un Open Question disfrazado de FR cerrado, y la densidad de open-items sobre dependencias de datos no confirmadas (D-8/D-10, OQ-124/OQ-125) sigue alta para un PRD que pretende destrabar arquitectura. Los rastros del modelo dual viejo en glosario/ejemplos son cosméticos pero erosionan confianza en un chain-top. Es un <code>draft</code> sólido que aún no debe leerse como green-light. <em>Comparado con el Validate del 2026-05-26 previo (3H/7M/2L), el perfil de hallazgos mejoró (3H/5M/1L) pero la calificación sigue gateada por los mismos 3 high.</em></p>
     </div>
 
     <div class="dimension-summary">
       <div class="dim-card">
         <div class="dim-name">Decision-readiness</div>
-        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
       </div>
       <div class="dim-card">
         <div class="dim-name">Substance over theater</div>
@@ -229,11 +229,11 @@
       </div>
       <div class="dim-card">
         <div class="dim-name">Done-ness clarity</div>
-        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
       </div>
       <div class="dim-card">
         <div class="dim-name">Scope honesty</div>
-        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
       </div>
       <div class="dim-card">
         <div class="dim-name">Downstream usability</div>
@@ -249,41 +249,13 @@
       <details>
         <summary>
           <h2>Decision-readiness</h2>
-          <span class="verdict-pill verdict-adequate">adequate</span>
+          <span class="verdict-pill verdict-strong">strong</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>El PRD nombra sus decisiones cerradas y las firma con fecha. §10.4 conserva textualmente la objeción de Winston sobre el modelo (C) ("garantía de divergencia — dos sistemas, dos verdades, ningún ganador") y le añade en la cuarta iteración una sección de <strong>honestidad epistémica</strong> que admite que la objeción no se neutraliza, solo se vigila. §6 desdobla la métrica de override en dos filas (ciclos 1-3 ≥ 25% vs ciclo 4+ &lt; 20%) absorbiendo la objeción de Dr. Quinn con un trade-off explícito y firmado. La métrica de "cobertura de configuración manual" está bien marcada como "seguimiento, no gate" — el PRD se cuida de no convertir un indicador de uso en un gate ficticio. Queda <em>adequate</em> y no <em>strong</em> porque los tres bloqueos Reviewer Gate restantes están fuera del control del PRD pero al menos uno (R-7 MAPE) tiene implicación de diseño no nombrada, y el sub-riesgo aceptado en R-1 ("arranca con todo en 0") no tiene contra-métrica explícita.</p>
+            <p>El PRD trata sus decisiones como decisiones, no como "consideraciones". La concesión epistémica central de SIM está expuesta con franqueza notable: §10.4 cita la objeción de Winston ("(C) coexistencia con doble captura es garantía de divergencia — dos sistemas, dos verdades, ningún ganador") y, en lugar de neutralizarla, el párrafo "Honestidad epistémica (post-F-03)" reconoce textualmente que "no es un riesgo distinto con nombre nuevo — es la misma objeción de Winston con etiqueta operacional" y que "ninguna [mitigación] es engineered mitigation… el modelo (C) no elimina la divergencia… la vigila". Eso es exactamente lo que pide esta dimensión: el trade-off nombrado con lo que se cede, no solo lo que se elige.</p>
+            <p>Las contra-métricas de §6 (divergencia SIM vs venta &gt; 10% MoM, override &gt; 50% post-calibración, pedidos urgentes &gt; 15% MoM) son señales reales de fallo, no adornos. Los trade-offs de scope (jefe fuera de v1, TFS solo histórico, conteo asistido eliminado) están enmarcados con el costo aceptado, no como ganancias gratis. El único punto que baja la nota de "perfecto" a "strong" sólido: FR-066 paso 4 introduce una regla de negocio con consecuencia financiera real marcada <code>[CONFIRMAR CON OWNER]</code> — decisión todavía abierta presentada dentro de un FR redactado como cerrado.</p>
           </div>
-        </div>
-        <div class="findings-list">
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">Sub-riesgo R-1 aceptado pero sin gate operacional explícito</h3>
-              <span class="finding-location">§11.16 + §12 R-1 + §6 fila "Cobertura de configuración manual"</span>
-            </header>
-            <div class="finding-note">El owner aceptó conscientemente que en ciclos tempranos el motor opera ciegamente sobre categorías en 0 y descansa en detección residual (FR-080) + overrides (FR-064). El PRD declara la concesión pero la métrica que la monitorea está marcada "seguimiento, no gate". Si la cobertura no crece o crece mal, no hay umbral pre-acordado para reaccionar.</div>
-            <div class="finding-fix"><strong>Fix:</strong> añadir contra-métrica concreta (ej. "si ≥X% de categorías sigue en 0 después de N ciclos, escalar a sponsor para decidir intervención") o documentar explícitamente que la trayectoria es aceptada sin gate.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">R-7 (MAPE Finanzas) con implicación de diseño no nombrada</h3>
-              <span class="finding-location">§9.10 NFR-T-5 + §12 R-7</span>
-            </header>
-            <div class="finding-note">Tres bloqueos Reviewer Gate documentados como externos, pero si Finanzas pide un MAPE muy estricto, el modelo dual + Holt-Winters/ARIMA puede no llegar. El PRD no nombra qué rango de MAPE asume implícitamente.</div>
-            <div class="finding-fix"><strong>Fix:</strong> documentar el rango asumido o nombrar explícitamente que <code>architecture.md</code> debe definir la respuesta si el target sale fuera de un rango razonable.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">OQ-120 abierta y FR-081 depende de ella</h3>
-              <span class="finding-location">§8.9 FR-081 + §13 OQ-120</span>
-            </header>
-            <div class="finding-note">FR-081 promete "sugerencia de atribución preliminar... mecanismo a definir en OQ-120". Sin mecanismo cerrado, FR-081 no es implementable. El PRD pasa a <code>architecture.md</code> un FR cuyo comportamiento aún no se ha decidido.</div>
-            <div class="finding-fix"><strong>Fix:</strong> cerrar OQ-120 con la recomendación inicial (opción 1, heurística confirmable ya propuesta) antes de Validate final, o documentar que FR-081 ship con atribución 100% manual hasta que cierre.</div>
-          </article>
         </div>
       </details>
     </section>
@@ -296,7 +268,8 @@
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Las cuatro variantes de teatro están bajo control. <strong>Persona theater:</strong> §7 tiene tres personas y dos están marcadas explícitamente como NO usuarios (Jefe = stakeholder externo cero interacción; Comprador = stakeholder pasivo downstream); solo el Coordinador es load-bearing. <strong>Vision theater:</strong> §1 declara explícitamente lo que NO ataca ("el cálculo manual de 6h/quincena del jefe <strong>no es dolor que v1 ataque directamente</strong>"). <strong>Innovation theater:</strong> §4 "Por qué no Excel" cada fila nombra una capacidad concreta con FR asociado. <strong>NFR theater:</strong> §9 tiene umbrales concretos en cada NFR (NFR-E-3 cuantificado a 8,600 series, NFR-DAT-4 = 36h, NFR-T-6 ≥80% mutantes PIT, contraste 4.5:1, debounce 150ms, autosave 8s). No hay un solo "razonable" / "eficiente" / "robusto" sin bound.</p>
+            <p>Poco relleno. Las tres personas (§7) son exactamente las que el producto necesita y cada una está justificada por su relación con el sistema, no por completitud: el coordinador es usuario interactivo, el comprador (Hugo) es consumidor downstream con función concreta (firma golden datasets, NFR-T-2), y el jefe de servicentro está marcado explícitamente como "no es usuario del sistema en v1" con justificación de por qué se documenta igual. Esa etiqueta convierte lo que sería persona-theater en contexto deliberado y honesto.</p>
+            <p>§4 "Por qué no Excel" es sustancia ganada, no furniture: distingue lo que Excel sí puede de lo que rompe a escala (validación de 38 tiendas × N SKUs, trazabilidad, fail-loud), con la cuenta dura del statu quo. Los NFR llevan umbrales product-specific (NFR-E-4 bandeja &lt; 3s; NFR-P-1 recálculo &lt; 100 ms con <code>debounceTime(150)</code>; NFR-DAT-4 frescura del snapshot), no boilerplate de "el sistema debe ser escalable".</p>
           </div>
         </div>
       </details>
@@ -310,77 +283,63 @@
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>La tesis es nombrable en una frase: <em>"Automatizar el día semanal del coordinador (no del jefe) ahorra ~1,092 horas-hombre/año; SIM sigue siendo única fuente de captura del jefe; las pérdidas se desdoblan en dos componentes configurables manualmente a discreción del coord."</em> O1..O4 derivan sin gaps. La coherencia se nota en cómo cada decisión grande se traza a través de múltiples secciones: el scope-cut C-3 (conteo asistido) aparece en §8.3 → §3-bis → R-1 → §8.9 → §11.12 → §11.16 → addendum A1; el modelo dual de pérdida aparece en §3 D-merma-1 → §5 O4 → §6 → §8.9 → §10.5 → §14; el canal correo único aparece en §2 → §3 D-exc-1 → §7.6 → §8.10 → §11.15 → §14. Cinco secciones contando la misma historia coherente, en tres dimensiones distintas. Las contra-métricas en §6 son genuinamente disconfirmatorias y la nueva "Divergencia SIM vs venta real &gt; 10%" acoplada con R-11 está bien construida para detectar la objeción de Winston materializándose.</p>
+            <p>Hay tesis explícita y las features la sirven. La tesis: "El dolor v1 vive en el coordinador" (§3), y todo el cuerpo se ordena alrededor de eso — los objetivos O1-O4 en orden de prioridad declarado, las capacidades C-1..C-12 mapean a dolores D-coord-* nombrados por código, y los dolores fuera de alcance (jefe) se aíslan en §3-bis. El MVP es coherentemente de tipo "problem-solving" (sustituir cálculo manual), no un catálogo de capacidades. La métrica principal valida la tesis: tiempo del coordinador (9h → &lt;2h). El encuadre de 3 fases da un arco de producto con v1 = Fase 1 claramente delimitado.</p>
+            <p>El riesgo de coherencia que sí existe es menor pero real: §6 marca como <code>[OPEN]</code> los baselines de quiebre y sobre-inventario (O2) y el MAPE/WAPE (R-7). La tesis financiera ("eliminar quiebres y sobre-inventario") tiene métricas declaradas pero sin baseline ni meta numérica cerrada — la tesis de tiempo está blindada, la de inventario todavía no. Es honesto (lo marca), pero significa que dos de los cuatro objetivos no son aún medibles.</p>
           </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Objetivos O2/O4 sin métrica cerrada mientras O1 sí</h3>
+              <span class="finding-location">§6</span>
+            </header>
+            <div class="finding-note">La métrica de tiempo del coordinador está cerrada (baseline 9h, meta &lt;2h), pero quiebre, sobre-inventario, MAPE/WAPE y candidatos atípicos siguen <code>[OPEN: baseline a recolectar en pilotaje]</code>. Para un PRD con impacto financiero, dos de cuatro objetivos no son verificables hoy.</div>
+            <div class="finding-fix"><strong>Fix:</strong> aceptar explícitamente que O1 es el objetivo gateado para v1 y O2/O4 son objetivos de pilotaje-a-confirmar, o cerrar al menos una meta direccional (p. ej. rango de cobertura sano) con Finanzas antes de subir a <code>final</code>.</div>
+          </article>
         </div>
       </details>
     </section>
 
     <section class="dimension">
-      <details>
+      <details open>
         <summary>
           <h2>Done-ness clarity</h2>
-          <span class="verdict-pill verdict-adequate">adequate</span>
+          <span class="verdict-pill verdict-thin">thin</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Esta era la dimensión más débil en la versión anterior y se mejoró: <code>buffer_seguridad</code> ahora está definido en FR-040 (parámetro configurable, valor inicial sugerido = 1 semana de cobertura), y <code>riesgo de quiebre</code> está operacionalizado en FR-051 (cobertura post-recorte ≥ 2 semanas). Las "F-Done-1" y "F-Done-2" del review anterior están cerradas. Sigue habiendo huecos: FR-061 "Excel capturado o ingresado" es ambiguo; FR-066 paso 4 sobre presupuesto en carry-over sin regla cerrada; FR-080 y FR-081 dependen de OQs abiertas; FR-082/FR-084 sin bounds operacionales de cordura; FR-014 hereda OQ-117 con formato pendiente; FR-110 "compatible" sin criterio bit-a-bit. Sube de <em>thin</em> a <em>adequate</em>, pero sigue requiriendo una pasada de criterios de aceptación por FR antes de generar stories.</p>
+            <p>Esta es la dimensión más débil y la que más importa para el chain-top hacia historias. El problema no es vaguedad de adjetivos sueltos (el PRD evita en general "razonable"/"amigable"), sino que <strong>varios FR del corazón del producto delegan su consecuencia verificable a <code>architecture.md</code> sin dejar un criterio de aceptación propio</strong>. FR-035 y FR-034 son el caso más claro: ambos dicen que el factor de pérdida se aplica "como ajuste porcentual sobre la demanda de venta" pero cierran con "La opción técnica concreta de cómo se aplica es decisión de <code>architecture.md</code> (F-05)". Un ingeniero de historias no puede escribir un criterio de aceptación testeable sin saber si el 0.9% multiplica el output, ajusta el histórico, o entra como término aditivo. FR-030 ("modelo estacional configurable") no acota qué cuenta como "done".</p>
+            <p>En contraste, FR-040, FR-051 y FR-054 sí están bien aterrizados: FR-040 da la fórmula completa con cada término definido y resuelve <code>buffer_seguridad</code>; FR-051 operacionaliza "riesgo de quiebre" como "cobertura post-recorte ≥ 2 semanas"; FR-054 da la fórmula <code>techo − compras_esporádicas</code>. Estos demuestran que el autor sabe escribir un FR con consecuencia verificable — por eso la inconsistencia con FR-030..035 destaca. FR-066 paso 4 falla por otra vía: la regla está enunciada con fórmula pero etiquetada <code>[CONFIRMAR CON OWNER]</code>, así que su "done" es condicional a una decisión no tomada.</p>
           </div>
         </div>
         <div class="findings-list">
           <article class="finding">
             <header>
               <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">FR-061 estado "solicitud recibida (Excel capturado o ingresado)" sin aclarar cómo entra el Excel al sistema</h3>
-              <span class="finding-location">§8.7 FR-061</span>
+              <h3 class="finding-title">FR-035 / FR-034 delegan la mecánica del factor a arquitectura sin criterio de aceptación propio</h3>
+              <span class="finding-location">§8.4 · FR-034/FR-035</span>
             </header>
-            <div class="finding-note">Bloquea diseño de bandeja distrital: ¿transcripción manual del coord?, ¿parseo de attachment de correo?, ¿flag manual del coord?, ¿ingesta de archivo plano del jefe? Es la decisión que define cuánto trabajo manual queda en el coord pre-revisión.</div>
-            <div class="finding-fix"><strong>Fix:</strong> abrir OQ explícita ("¿cómo entran las solicitudes del jefe al sistema?") con tres opciones (a) transcripción manual del coord, (b) ingesta de Excel desde carpeta compartida, (c) sistema parsea correo. Decisión owner antes de Validate.</div>
+            <div class="finding-note">"La opción técnica concreta de cómo se aplica es decisión de <code>architecture.md</code> (F-05)". El motor de pérdida es central a O4 y el propio PRD dice que la elección "afecta R-7 (MAPE)"; sin acotar el modo de aplicación, una historia downstream no tiene condición testeable.</div>
+            <div class="finding-fix"><strong>Fix:</strong> dejar que arquitectura elija la implementación, pero fijar en el FR la consecuencia observable (p. ej. "para una tienda con venta esperada V y factor f, la demanda ajustada cumple <code>demanda = V × (1+f)</code> antes de cuantización; el trazo declara V, f, nivel y resultado"), de modo que el criterio de aceptación exista independiente del método interno.</div>
           </article>
           <article class="finding">
             <header>
               <span class="badge badge-sev-high">high</span>
-              <h3 class="finding-title">FR-066 paso 4 "recalcula presupuesto disponible para semana N+1" sin regla cerrada</h3>
-              <span class="finding-location">§8.7 FR-066</span>
+              <h3 class="finding-title">FR-030 no acota "done" del forecast</h3>
+              <span class="finding-location">§8.4 · FR-030</span>
             </header>
-            <div class="finding-note">Define un comportamiento crítico de FR-054 sin enunciarlo. ¿Se acumula techo de N+N+1 cuando hay carry-over? ¿Se descarta N? ¿Cómo exactamente se ajusta N+1? El PRD no responde y la decisión cambia significativamente el comportamiento del sistema.</div>
-            <div class="finding-fix"><strong>Fix:</strong> enunciar la regla explícitamente en FR-066 o abrir OQ explícita.</div>
+            <div class="finding-note">"modelo estacional configurable (familia de modelos en Java puro…)" no define qué resultado verificar ni cómo se comporta con tiendas de &lt; 12 meses (abierto en OQ-108). Es el FR más cargado de valor y el menos verificable.</div>
+            <div class="finding-fix"><strong>Fix:</strong> añadir criterio de aceptación basado en el backtesting (NFR-T-5) — "el forecast produce una cantidad por tienda × SKU × ciclo cuya desviación vs YoY queda dentro del criterio acordado (R-7)" — y resolver o referir explícitamente el caso de tienda nueva como precondición de done.</div>
           </article>
           <article class="finding">
             <header>
               <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">FR-080 + FR-081 dependen de OQ-106 y OQ-120 abiertas</h3>
-              <span class="finding-location">§8.9 FR-080/FR-081 + §13 OQ-106/OQ-120</span>
+              <h3 class="finding-title">FR-066 paso 4 es una regla financiera con done condicional</h3>
+              <span class="finding-location">§8.7 · FR-066</span>
             </header>
-            <div class="finding-note">Dos FRs centrales del modelo dual de pérdida no son implementables sin las dos OQs cerradas. El umbral residual estadístico y el mecanismo de atribución preliminar son piezas que se pasan a <code>architecture.md</code> sin estar definidas.</div>
-            <div class="finding-fix"><strong>Fix:</strong> cerrar al menos OQ-120 con la recomendación inicial (opción 1, heurística confirmable) antes de Validate; OQ-106 puede quedar como decisión de pilotaje siempre que se enuncie el comportamiento default ("hasta umbral acordado, FR-080 surface todo residual ≥ 1σ").</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">FR-082 / FR-084 sin bounds operacionales de cordura</h3>
-              <span class="finding-location">§8.9</span>
-            </header>
-            <div class="finding-note">La configuración manual de los dos factores en piezas no tiene validación de cordura. ¿Hay límite superior razonable? ¿El sistema alerta si el factor supera X% de la demanda esperada? Sin estos bounds, el cofactor puede convertir el forecast en absurdo sin guardarraíl.</div>
-            <div class="finding-fix"><strong>Fix:</strong> añadir FR o nota en FR-082 con validación mínima — ej. "alerta si factor &gt; X% de la demanda esperada del periodo".</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">FR-014 hereda OQ-117 con formato del snapshot pendiente</h3>
-              <span class="finding-location">§8.2 FR-014 + §13 OQ-117</span>
-            </header>
-            <div class="finding-note">SLA de frescura cerrado (NFR-DAT-4 = 36h) pero el formato concreto del CSV de snapshot no está enunciado, lo que bloquea la implementación de la ingesta en <code>architecture.md</code>.</div>
-            <div class="finding-fix"><strong>Fix:</strong> enunciar formato propuesto como decisión arquitectónica concreta (CSV con encoding UTF-8 BOM o cp1252, columnas mínimas declaradas) o tratarlo como decisión de <code>architecture.md</code> con bounds claras y dueño.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">FR-110 "compatible" sin criterio bit-a-bit operacional</h3>
-              <span class="finding-location">§8.12 FR-110</span>
-            </header>
-            <div class="finding-note">Aunque la fixture inmutable de Hugo (NFR-T-2) cubre el caso operacional, "compatible" como verbo no está definido a nivel bit. El PRD podría nombrar explícitamente qué cuenta como divergencia bloqueante (orden de columnas, formatos de celda, encoding, metadatos).</div>
-            <div class="finding-fix"><strong>Fix:</strong> añadir línea en FR-110: "compatible = idéntico estructuralmente al fixture firmado por Hugo (orden de columnas, formatos de celda, encoding XLSX)".</div>
+            <div class="finding-note">La fórmula de presupuesto en carry-over está marcada <code>[CONFIRMAR CON OWNER]</code>; su criterio de aceptación depende de una decisión abierta. Es una regla con efecto en MXN presentada como FR "cerrado" sin firma.</div>
+            <div class="finding-fix"><strong>Fix:</strong> extraer la regla a un Open Question (OQ nueva) hasta confirmarla, o confirmarla y quitar el marcador; no dejar una regla con efecto en MXN como FR cerrado sin firma.</div>
           </article>
         </div>
       </details>
@@ -390,12 +349,33 @@
       <details>
         <summary>
           <h2>Scope honesty</h2>
-          <span class="verdict-pill verdict-strong">strong</span>
+          <span class="verdict-pill verdict-adequate">adequate</span>
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>El PRD trata las omisiones como ciudadanas de primera. §11 tiene 16 sub-secciones de out-of-scope, cada una con justificación. §3-bis es una sección entera dedicada a documentar el dolor histórico del jefe que v1 NO ataca. Los <code>[ASSUMPTION]</code> tags se usan con discreción y precisión, y los <code>[OPEN: baseline a recolectar]</code> están todos rastreables a OQs. Las decisiones explícitamente firmadas con fecha (C-O2..C-O22, D-1..D-7) constituyen una bitácora embebida en el documento — que el <code>.decision-log.md</code> tenga 774 líneas y el PRD las refleje en su cuerpo es disciplina notable. Las contra-métricas en §6 son scope honesto en forma de operación. La honestidad epistémica añadida en §10.4 (post-F-03 del Validate anterior) — la admisión textual de que las mitigaciones de R-11 son "detección + escalamiento humano... ninguna es engineered mitigation" — es excepcional. Pocos PRDs nombran este nivel de honestidad sobre sus propias mitigaciones.</p>
+            <p>La sección Out-of-scope (§11) hace trabajo real: 17 exclusiones, cada una justificada y muchas con su destino futuro (v1.1 / v2) y su FR-eliminado trazado (FR-004, FR-015, FR-020..025, FR-042, FR-062, FR-070..072, FR-090, NFR-E-2, NFR-DAT-2). Los <code>[ASSUMPTION]</code> están presentes donde corresponde. Los tachados de FR/NFR eliminados con razón inline son ejemplares para downstream — no hay des-scoping silencioso.</p>
+            <p>Lo que baja la nota de <code>strong</code> a <code>adequate</code> es la <strong>densidad de open-items relativa a las pretensiones del documento</strong>. Para la dimensión donde más pesa — las fuentes de datos productivas — D-8 (ventas semanales) y D-10 (ALLOC/TFS) son decisiones firmadas que <em>dependen</em> de extracts no confirmados ("a confirmar con Fernando"). El efecto neto es que la cadencia semanal —pilar del motor— se apoya en un input cuya existencia no está confirmada, con fallback de prorrateo "con error". Es scope honesty bien ejecutada en la forma, pero es un nivel de incertidumbre de datos que un lector debe entender como bloqueante de arquitectura, no como detalle.</p>
           </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Densidad de open-items sobre fuentes de datos vs. pretensión de destrabar arquitectura</h3>
+              <span class="finding-location">§10.6 · R-12 · OQ-124/OQ-125</span>
+            </header>
+            <div class="finding-note">El pilar de cadencia semanal (D-8) y el cálculo del pedido con tránsito (D-10) dependen de extracts RMS/BigQuery "a confirmar con Fernando", aún sin dueño/formato/SLA. Está marcado honestamente, pero es una dependencia de datos no confirmada bajo una decisión presentada como firmada.</div>
+            <div class="finding-fix"><strong>Fix:</strong> elevar la confirmación de la fuente semanal a precondición explícita de <code>architecture.md</code> y marcar D-8/D-10 como "firmadas condicionalmente a OQ-124/OQ-125"; documentar el umbral de error del fallback de prorrateo para que arquitectura sepa cuándo es inaceptable.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Open-item disfrazado de FR cerrado</h3>
+              <span class="finding-location">§8.7 · FR-066 paso 4</span>
+            </header>
+            <div class="finding-note">Ya señalado en Done-ness; cuenta también como ruido de scope honesty porque un open-item incrustado como FR (en vez de declarado como OQ) infla la apariencia de cierre y el conteo de FR "cerrados".</div>
+            <div class="finding-fix"><strong>Fix:</strong> convertir a OQ hasta confirmación del owner.</div>
+          </article>
         </div>
       </details>
     </section>
@@ -408,45 +388,37 @@
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Este PRD es chain-top (alimenta <code>architecture.md</code> → UX → epics → stories), así que la dimensión pesa más. Glosario robusto (30+ entradas con las dos críticas nuevas, "uso interno" y "error de operador", bien diferenciadas). ID space coherente con eliminaciones explícitas marcadas con <code>~~strikethrough~~</code>. Cross-references referenciables (§3 nombra dolores que §8 atiende con FRs nominados; §6 cita FRs explícitamente; §7.6 acopla UJ-3-TB con FR-091..095). Donde se queda en <em>adequate</em>: OQ-106 quedó huérfana tras eliminar FR-015 (el histórico de mermas ya no se ingesta, pero la OQ sigue preguntando por su estructura); Comprador (Hugo, §7.3) sin UJ explícita; <code>SolicitusDeInsumosTodos.xlsx</code> aparece en el PRD pero no en <code>project-context.md</code> como input canónico — inconsistencia documentada pero no cerrada; uso textual de "merma" sigue mezclando coloquial vs técnico ("uso interno + error de operador") sin marca consistente.</p>
+            <p>Para un chain-top esto importa, y el PRD lo soporta razonablemente. Hay glosario (§14) extenso; los IDs FR son estables y referenciados desde dolores, UJs y riesgos; los UJ nombran personas de §7 por etiqueta. Las capacidades C-1..C-12 dan agrupación limpia para epics. El export (FR-110) declara contrato literal contra <code>SolicitusDeInsumosTodos.xlsx</code> y NFR-T-2/T-4 fijan fixture y contract testing — buen anclaje para historias.</p>
+            <p>Lo que erosiona la usabilidad downstream son <strong>rastros del modelo viejo y un par de inconsistencias internas</strong> que un extractor automático arrastraría como verdad: (1) el glosario de "Coordinador" todavía dice "rota guardia semanal para consolidación", contradiciendo §2 y §7.2; (2) FR-101 muestra al "Jefe" como actor de bitácora, imposible en v1; (3) R-11 dice SLA "48h" mientras NFR-DAT-4/OQ-117 dicen "36h". Ninguno bloquea por sí solo, pero en un chain-top de alto riesgo los tres son trampas para el extractor.</p>
           </div>
         </div>
         <div class="findings-list">
           <article class="finding">
             <header>
-              <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">OQ-106 reformulada pero su objeto (estructura del histórico de mermas) ya no existe</h3>
-              <span class="finding-location">§13 OQ-106 + FR-015 eliminado</span>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Glosario de "Coordinador" contradice el modelo de rol del cuerpo</h3>
+              <span class="finding-location">§14 glosario vs §2/§7.2</span>
             </header>
-            <div class="finding-note">La OQ pregunta por la estructura de un histórico que el owner decidió no ingestar (parte 3 del decision log). Es OQ huérfana — la pregunta ya no aplica.</div>
-            <div class="finding-fix"><strong>Fix:</strong> re-reformular OQ-106 a "umbral residual estadístico sobre snapshot SIM + venta histórica + factores configurados", eliminando referencia al histórico; o cerrar como N/A y abrir OQ nueva para el umbral.</div>
+            <div class="finding-note">El glosario dice "rota guardia semanal para consolidación"; el cuerpo insiste en asignación fija y consolidación no rotada ("Cada coordinador trabaja su distrito todas las semanas… la guardia rotativa aplica solo a tareas inter-distritales"). El glosario es la fuente que UX/arquitectura source-extraen — un downstream lo modelaría mal.</div>
+            <div class="finding-fix"><strong>Fix:</strong> reescribir la entrada: "supervisa un distrito fijo asignado territorialmente; consolida su distrito todas las semanas; la guardia rotativa aplica solo a tareas inter-distritales y no la gobierna el sistema".</div>
           </article>
           <article class="finding">
             <header>
               <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">Comprador (Hugo) sin UJ explícita</h3>
-              <span class="finding-location">§7.3 + §7.6</span>
+              <h3 class="finding-title">FR-101 ejemplo de bitácora incluye al "Jefe" como actor</h3>
+              <span class="finding-location">§8.11 · FR-101</span>
             </header>
-            <div class="finding-note">Persona definida pero handoff downstream no journey-modeled. Para <code>architecture.md</code> y UX, conviene tener el paso explícito de recepción del export — define la frontera del sistema con precisión.</div>
-            <div class="finding-fix"><strong>Fix:</strong> añadir UJ-4 "Recepción del export por el comprador" con 3-4 pasos (recibe correo → abre XLSX → verifica fixture → procesa OC en flujo actual fuera del sistema).</div>
+            <div class="finding-note">El ejemplo "<code>original modelo X → Jefe Carlos 07:48: Y → Coord. Marco 09:12: aprobado</code>" enseña una cadena imposible: el jefe no opera el sistema en v1 (§7.1, FR-090 eliminado). Puede inducir un modelo de datos con actor "jefe".</div>
+            <div class="finding-fix"><strong>Fix:</strong> cambiar el ejemplo a actores reales de v1, p. ej. "<code>original modelo X → Coord. Marco 09:12: Y (override, razón) → aprobado</code>".</div>
           </article>
           <article class="finding">
             <header>
               <span class="badge badge-sev-medium">medium</span>
-              <h3 class="finding-title">SolicitusDeInsumosTodos.xlsx falta en project-context.md no resuelto</h3>
-              <span class="finding-location">§10.2</span>
+              <h3 class="finding-title">SLA de frescura del snapshot SIM con dos valores</h3>
+              <span class="finding-location">§12 R-11 mit. 1 (48h) vs §9.6 NFR-DAT-4 / OQ-117 (36h)</span>
             </header>
-            <div class="finding-note">Inconsistencia con la fuente de verdad del proyecto documentada en el propio PRD pero no cerrada. <code>project-context.md</code> lista el inventario canónico de archivos en <code>docs/</code> pero no incluye este XLSX que ahora es contrato del export.</div>
-            <div class="finding-fix"><strong>Fix:</strong> actualizar <code>project-context.md</code> (vía <code>bmad-generate-project-context</code>) para incluirlo como archivo canónico, o documentar en este PRD que es input nuevo gobernado por el sistema.</div>
-          </article>
-          <article class="finding">
-            <header>
-              <span class="badge badge-sev-low">low</span>
-              <h3 class="finding-title">Drift glosario: uso coloquial vs técnico de "merma" inconsistente</h3>
-              <span class="finding-location">§14 + §3 D-merma-1 + §11.16 + R-3</span>
-            </header>
-            <div class="finding-note">El glosario aclara que "merma" se desdobla en dos componentes (uso interno + error de operador), pero el cuerpo del PRD sigue mezclando coloquial ("merma") con técnico sin marca consistente. Para UX que decidirá el wording de la UI, conviene una regla estricta.</div>
-            <div class="finding-fix"><strong>Fix:</strong> establecer regla — "merma" solo aparece entre comillas como término coloquial; el sistema y la UI usan "uso interno" / "error de operador" / "pérdida".</div>
+            <div class="finding-note">Número contradictorio para el mismo control: R-11 dice "propuesta inicial 48h máximo" mientras NFR-DAT-4 y OQ-117 dicen 36h (24h + 12h buffer).</div>
+            <div class="finding-fix"><strong>Fix:</strong> alinear R-11 a 36h (el valor endurecido y cerrado en NFR-DAT-4) y eliminar la "propuesta inicial 48h".</div>
           </article>
         </div>
       </details>
@@ -460,7 +432,8 @@
         </summary>
         <div class="dim-body">
           <div class="dim-judgment">
-            <p>Este PRD ajusta correctamente a su shape: multi-stakeholder B2B híbrido con MVP problem-solving. Tres tipos de usuario (jefe-stakeholder-externo, coordinador-actor-principal, comprador-stakeholder-downstream), tres modos de operación del actor principal, objetivo de "automatizar lo que ya se hace a mano" — no es greenfield innovation, es internal tool con UX que importa porque el coord pasa 9h/semana ahí. Las personas y UJs están bien dosificadas para el shape: tres personas (no doce), journeys AS-IS + TO-BE para los flujos críticos. Para chain-top que alimenta <code>architecture.md</code>: el PRD respeta la separación con disciplina — §10 entera dice explícitamente "no decide arquitectura — esa decisión es de <code>architecture.md</code>" y enumera dependencias técnicas, restricciones y OQs sin pre-decidir solución. Addendum A3.3 enumera "decisiones arquitectónicas implícitas en el PRD pendientes de validar" (RxJS debounce, bitácora inmutable como event sourcing, export bit-a-bit XLSX) — el PRD se autocensura proactivamente sobre dónde se metió sin querer en arquitectura. Eso es shape-awareness avanzada.</p>
+            <p>El PRD acierta su forma. Es una herramienta interna multi-rol con motor de forecast y trazabilidad financiera, no un consumer product — y el documento la trata así: los UJ existen porque hay flujos operativos reales (consolidación semanal, excepción mid-cycle desdoblada en AS-IS/TO-BE), pero no se sobre-formaliza con personas decorativas ni journeys para roles que no operan. La decisión de documentar al jefe de servicentro como persona §7.1 <strong>sin</strong> convertirlo en usuario está justificada explícitamente y sirve a v2 (no es theater: la etiqueta "no es usuario del sistema en v1" lo deja inequívoco y el UJ-1 vive como AS-IS de contexto, relegado al addendum). El comprador Hugo sin UJ propia es correcto para un consumidor downstream pasivo.</p>
+            <p>La constraint traceability (stack obligatorio, convenciones de datos, fail-loud) se delega correctamente a <code>project-context.md</code> sin re-litigar, y §10 separa con disciplina lo que el PRD expone de lo que arquitectura decide. La forma es la correcta y está ejecutada con criterio.</p>
           </div>
         </div>
       </details>
@@ -469,20 +442,20 @@
     <div class="mechanical">
       <h3>Mechanical notes</h3>
       <ul>
-        <li><strong>ID continuity:</strong> FR-006, FR-007, FR-014, FR-054, FR-066, FR-074, FR-075 numerados consistentemente. Eliminaciones (~~FR-004~~, ~~FR-015~~, ~~FR-020-025~~, ~~FR-042~~, ~~FR-062~~, ~~FR-070-072~~, ~~FR-090~~, ~~NFR-E-2~~, ~~NFR-DAT-2~~, ~~C-3~~) preservadas con strikethrough. ID space saludable.</li>
-        <li><strong>Assumptions Index roundtrip:</strong> los <code>[ASSUMPTION]</code> inline están todos rastreables a OQs o métricas marcadas <code>[OPEN:]</code>. No vi <code>[ASSUMPTION]</code> huérfano.</li>
-        <li><strong>UJ persona linkage:</strong> UJ-1 ↔ Jefe (§7.1), UJ-2 ↔ Coordinador (§7.2), UJ-3-AS-IS/TB ↔ Coordinador + Jefe-externo (§7.6), UJ-2-TB ↔ Coordinador (§7.7). Sin floating UJs. Comprador (Hugo, §7.3) sin UJ explícita — marcado como Downstream finding.</li>
-        <li><strong>Cross-refs resueltos:</strong> C-9 ↔ FR-035 ↔ FR-080..085 ↔ §6 métricas; C-10 ↔ FR-091..095 ↔ §7.6 UJ-3-TB; FR-054 ↔ FR-095 ↔ §3 D-exc-5. Roundtrip limpio.</li>
-        <li><strong>Estado del documento:</strong> frontmatter <code>status: draft</code> correctamente puesto — los 3 bloqueos Reviewer Gate restantes (R-7, R-8, R-9) son acciones externas, no scope decisions, y el PRD lo declara. <strong>No promover a <code>final</code></strong> sin cerrar los 3 bloqueos externos, OQ-120 (mecanismo atribución), el hueco de FR-061 ("Excel capturado o ingresado") y el hueco de FR-066 (regla de carry-over).</li>
-        <li><strong>Reviewer Gate footer:</strong> la sección "Estado actual del PRD" al final del cuerpo documenta los 5 bloqueos cerrados / 3 abiertos con detalle.</li>
+        <li><strong>Drift de glosario (modelo dual → factor único):</strong> el término "factor de merma esperada" (lenguaje del modelo dual) sobrevive en D-jefe-2 (línea 94), C-3 §8.3 (línea 289), §11.12 (línea 649) y OQ-114 opción (b) (línea 825), mientras el cuerpo nuevo usa "factor único de pérdida". OQ-114 opción (b) propone "continuar usando factor de merma esperada como compensación" — terminología pre-D-9. Normalizar a "factor único de pérdida".</li>
+        <li><strong>Continuidad de IDs OQ:</strong> OQ-121 y OQ-122 aparecen después de OQ-126 (líneas 872 y 876), fuera de orden numérico. No rompe referencias (ambas cerradas/superadas) pero desordena la lectura. Reubicar tras OQ-120 o anotar el salto.</li>
+        <li><strong>Cross-ref a hallazgos internos (F-NN, C-O-NN):</strong> el PRD referencia "F-05", "F-Done-1/2", "F-16/F-17/F-18", "C-O2..C-O40" como identificadores estables, pero no hay índice que los resuelva dentro del PRD ni del addendum. Downstream no puede dereferenciarlos. Añadir un mini-índice o convertirlos en prosa.</li>
+        <li><strong>Roundtrip de Assumptions:</strong> los <code>[ASSUMPTION]</code> están inline (OQ-101, baselines TFS §4, ventana de excepciones §2) pero no hay un Índice de Assumptions consolidado al final como la rúbrica espera. Para un chain-top conviene. Severidad baja.</li>
+        <li><strong>D-IDs sin tabla de decisiones:</strong> D-1, D-2, D-5..D-12 se citan por todo el documento (decisiones firmadas) pero no hay tabla única que liste cada D-NN con su enunciado; están dispersas en notas de FR y en el cierre §14. Un Decision Log tabular ayudaría a downstream.</li>
+        <li><strong>Continuidad FR:</strong> los rangos eliminados (FR-004, 015, 020-025, 042, 062, 070-072, 090) están todos tachados con razón inline — buena higiene. No se detectaron duplicados ni FR huérfanos referenciados.</li>
+        <li><strong>Secciones requeridas:</strong> presentes y completas para los stakes (Visión, Contexto, Problema, Objetivos, Métricas con contra-métricas, Personas/UJ, FR por capacidad, NFR, Contexto técnico, Out-of-scope, Riesgos, Open Questions, Glosario).</li>
       </ul>
     </div>
 
     <footer class="report-footer">
       <div class="meta">
         <span>Rubric: .claude/skills/bmad-prd/assets/prd-validation-checklist.md</span>
-        <span>PRD: _producto/planning-artifacts/prds/prd-insumos-odemas-2026-05-22/prd.md</span>
-        <span>Generated: 2026-05-26</span>
+        <span>Generated: 2026-05-26T21:35:40-06:00</span>
       </div>
     </footer>
   </div>
