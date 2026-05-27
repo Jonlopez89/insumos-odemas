@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<title>PRD Validation: insumos-odemas</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .grade-excellent { background: var(--grade-exc); }
+  .grade-good { background: var(--grade-good); }
+  .grade-fair { background: var(--grade-fair); }
+  .grade-poor { background: var(--grade-poor); }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>insumos-odemas — Validation Report</h1>
+        <div class="subtitle">_producto/planning-artifacts/prds/prd-insumos-odemas-2026-05-22/prd.md</div>
+      </div>
+      <div class="grade grade-fair">Fair</div>
+    </header>
+
+    <div class="synthesis">
+      <p>Después de cuatro iteraciones en 24 horas el PRD llega a un punto inusual de coherencia narrativa para un documento todavía en <code>draft</code>: la tesis es nombrable en una frase, la concesión epistémica central (operar sobre SIM sucio sin sanearlo) está declarada cinco veces de formas consistentes, y la decisión más resbalosa —qué hacer con la pérdida invisible— se reescribió desde "factor seedeado desde histórico" a "default = 0 + configuración manual progresiva a discreción del coord", lo cual es una rara muestra de scope honesto bajando expectativas en lugar de subirlas. El PRD subió desde "Poor" en la corrida anterior hacia algo equivalente a "Good con bloqueos externos documentados".</p>
+      <p>Lo que sostiene el documento son §10.4 (modelo SIM (C) con objeción de Winston textualmente preservada), §8.9 (modelo dual de pérdida bien estructurado), §6 (métricas y contra-métricas calibradas a la fase) y §11 (out-of-scope detallado con tratamiento de cada exclusión). Lo que sigue poniéndolo en riesgo como input para <code>architecture.md</code> son: (a) tres bloqueos Reviewer Gate todavía abiertos (R-7 MAPE, R-8 spike Java, R-9 backtesting + pilot baselines), correctamente documentados como acciones externas no decisiones de scope; (b) un sub-riesgo aceptado por el owner (sistema arranca con todo en 0) que delega la calidad inicial del forecast a detección residual + overrides, sin gate operacional; (c) algunos huecos de definición todavía vivos: FR-061 "Excel capturado o ingresado" sin aclarar el mecanismo de entrada, FR-066 paso 4 sin regla cerrada para el presupuesto en carry-over, OQ-106 reformulación huérfana porque el histórico ya no se ingesta, y OQ-120 mecanismo de atribución residual abierta. El grade <strong>Fair</strong> deriva mecánicamente de los 3 findings altos; ninguna dimensión está broken ni thin.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Decision-readiness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Substance over theater</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Strategic coherence</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Done-ness clarity</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Scope honesty</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Downstream usability</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+    </div>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Decision-readiness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>El PRD nombra sus decisiones cerradas y las firma con fecha. §10.4 conserva textualmente la objeción de Winston sobre el modelo (C) ("garantía de divergencia — dos sistemas, dos verdades, ningún ganador") y le añade en la cuarta iteración una sección de <strong>honestidad epistémica</strong> que admite que la objeción no se neutraliza, solo se vigila. §6 desdobla la métrica de override en dos filas (ciclos 1-3 ≥ 25% vs ciclo 4+ &lt; 20%) absorbiendo la objeción de Dr. Quinn con un trade-off explícito y firmado. La métrica de "cobertura de configuración manual" está bien marcada como "seguimiento, no gate" — el PRD se cuida de no convertir un indicador de uso en un gate ficticio. Queda <em>adequate</em> y no <em>strong</em> porque los tres bloqueos Reviewer Gate restantes están fuera del control del PRD pero al menos uno (R-7 MAPE) tiene implicación de diseño no nombrada, y el sub-riesgo aceptado en R-1 ("arranca con todo en 0") no tiene contra-métrica explícita.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">Sub-riesgo R-1 aceptado pero sin gate operacional explícito</h3>
+              <span class="finding-location">§11.16 + §12 R-1 + §6 fila "Cobertura de configuración manual"</span>
+            </header>
+            <div class="finding-note">El owner aceptó conscientemente que en ciclos tempranos el motor opera ciegamente sobre categorías en 0 y descansa en detección residual (FR-080) + overrides (FR-064). El PRD declara la concesión pero la métrica que la monitorea está marcada "seguimiento, no gate". Si la cobertura no crece o crece mal, no hay umbral pre-acordado para reaccionar.</div>
+            <div class="finding-fix"><strong>Fix:</strong> añadir contra-métrica concreta (ej. "si ≥X% de categorías sigue en 0 después de N ciclos, escalar a sponsor para decidir intervención") o documentar explícitamente que la trayectoria es aceptada sin gate.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-7 (MAPE Finanzas) con implicación de diseño no nombrada</h3>
+              <span class="finding-location">§9.10 NFR-T-5 + §12 R-7</span>
+            </header>
+            <div class="finding-note">Tres bloqueos Reviewer Gate documentados como externos, pero si Finanzas pide un MAPE muy estricto, el modelo dual + Holt-Winters/ARIMA puede no llegar. El PRD no nombra qué rango de MAPE asume implícitamente.</div>
+            <div class="finding-fix"><strong>Fix:</strong> documentar el rango asumido o nombrar explícitamente que <code>architecture.md</code> debe definir la respuesta si el target sale fuera de un rango razonable.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">OQ-120 abierta y FR-081 depende de ella</h3>
+              <span class="finding-location">§8.9 FR-081 + §13 OQ-120</span>
+            </header>
+            <div class="finding-note">FR-081 promete "sugerencia de atribución preliminar... mecanismo a definir en OQ-120". Sin mecanismo cerrado, FR-081 no es implementable. El PRD pasa a <code>architecture.md</code> un FR cuyo comportamiento aún no se ha decidido.</div>
+            <div class="finding-fix"><strong>Fix:</strong> cerrar OQ-120 con la recomendación inicial (opción 1, heurística confirmable ya propuesta) antes de Validate final, o documentar que FR-081 ship con atribución 100% manual hasta que cierre.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Substance over theater</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Las cuatro variantes de teatro están bajo control. <strong>Persona theater:</strong> §7 tiene tres personas y dos están marcadas explícitamente como NO usuarios (Jefe = stakeholder externo cero interacción; Comprador = stakeholder pasivo downstream); solo el Coordinador es load-bearing. <strong>Vision theater:</strong> §1 declara explícitamente lo que NO ataca ("el cálculo manual de 6h/quincena del jefe <strong>no es dolor que v1 ataque directamente</strong>"). <strong>Innovation theater:</strong> §4 "Por qué no Excel" cada fila nombra una capacidad concreta con FR asociado. <strong>NFR theater:</strong> §9 tiene umbrales concretos en cada NFR (NFR-E-3 cuantificado a 8,600 series, NFR-DAT-4 = 36h, NFR-T-6 ≥80% mutantes PIT, contraste 4.5:1, debounce 150ms, autosave 8s). No hay un solo "razonable" / "eficiente" / "robusto" sin bound.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Strategic coherence</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La tesis es nombrable en una frase: <em>"Automatizar el día semanal del coordinador (no del jefe) ahorra ~1,092 horas-hombre/año; SIM sigue siendo única fuente de captura del jefe; las pérdidas se desdoblan en dos componentes configurables manualmente a discreción del coord."</em> O1..O4 derivan sin gaps. La coherencia se nota en cómo cada decisión grande se traza a través de múltiples secciones: el scope-cut C-3 (conteo asistido) aparece en §8.3 → §3-bis → R-1 → §8.9 → §11.12 → §11.16 → addendum A1; el modelo dual de pérdida aparece en §3 D-merma-1 → §5 O4 → §6 → §8.9 → §10.5 → §14; el canal correo único aparece en §2 → §3 D-exc-1 → §7.6 → §8.10 → §11.15 → §14. Cinco secciones contando la misma historia coherente, en tres dimensiones distintas. Las contra-métricas en §6 son genuinamente disconfirmatorias y la nueva "Divergencia SIM vs venta real &gt; 10%" acoplada con R-11 está bien construida para detectar la objeción de Winston materializándose.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Done-ness clarity</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Esta era la dimensión más débil en la versión anterior y se mejoró: <code>buffer_seguridad</code> ahora está definido en FR-040 (parámetro configurable, valor inicial sugerido = 1 semana de cobertura), y <code>riesgo de quiebre</code> está operacionalizado en FR-051 (cobertura post-recorte ≥ 2 semanas). Las "F-Done-1" y "F-Done-2" del review anterior están cerradas. Sigue habiendo huecos: FR-061 "Excel capturado o ingresado" es ambiguo; FR-066 paso 4 sobre presupuesto en carry-over sin regla cerrada; FR-080 y FR-081 dependen de OQs abiertas; FR-082/FR-084 sin bounds operacionales de cordura; FR-014 hereda OQ-117 con formato pendiente; FR-110 "compatible" sin criterio bit-a-bit. Sube de <em>thin</em> a <em>adequate</em>, pero sigue requiriendo una pasada de criterios de aceptación por FR antes de generar stories.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">FR-061 estado "solicitud recibida (Excel capturado o ingresado)" sin aclarar cómo entra el Excel al sistema</h3>
+              <span class="finding-location">§8.7 FR-061</span>
+            </header>
+            <div class="finding-note">Bloquea diseño de bandeja distrital: ¿transcripción manual del coord?, ¿parseo de attachment de correo?, ¿flag manual del coord?, ¿ingesta de archivo plano del jefe? Es la decisión que define cuánto trabajo manual queda en el coord pre-revisión.</div>
+            <div class="finding-fix"><strong>Fix:</strong> abrir OQ explícita ("¿cómo entran las solicitudes del jefe al sistema?") con tres opciones (a) transcripción manual del coord, (b) ingesta de Excel desde carpeta compartida, (c) sistema parsea correo. Decisión owner antes de Validate.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">FR-066 paso 4 "recalcula presupuesto disponible para semana N+1" sin regla cerrada</h3>
+              <span class="finding-location">§8.7 FR-066</span>
+            </header>
+            <div class="finding-note">Define un comportamiento crítico de FR-054 sin enunciarlo. ¿Se acumula techo de N+N+1 cuando hay carry-over? ¿Se descarta N? ¿Cómo exactamente se ajusta N+1? El PRD no responde y la decisión cambia significativamente el comportamiento del sistema.</div>
+            <div class="finding-fix"><strong>Fix:</strong> enunciar la regla explícitamente en FR-066 o abrir OQ explícita.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">FR-080 + FR-081 dependen de OQ-106 y OQ-120 abiertas</h3>
+              <span class="finding-location">§8.9 FR-080/FR-081 + §13 OQ-106/OQ-120</span>
+            </header>
+            <div class="finding-note">Dos FRs centrales del modelo dual de pérdida no son implementables sin las dos OQs cerradas. El umbral residual estadístico y el mecanismo de atribución preliminar son piezas que se pasan a <code>architecture.md</code> sin estar definidas.</div>
+            <div class="finding-fix"><strong>Fix:</strong> cerrar al menos OQ-120 con la recomendación inicial (opción 1, heurística confirmable) antes de Validate; OQ-106 puede quedar como decisión de pilotaje siempre que se enuncie el comportamiento default ("hasta umbral acordado, FR-080 surface todo residual ≥ 1σ").</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">FR-082 / FR-084 sin bounds operacionales de cordura</h3>
+              <span class="finding-location">§8.9</span>
+            </header>
+            <div class="finding-note">La configuración manual de los dos factores en piezas no tiene validación de cordura. ¿Hay límite superior razonable? ¿El sistema alerta si el factor supera X% de la demanda esperada? Sin estos bounds, el cofactor puede convertir el forecast en absurdo sin guardarraíl.</div>
+            <div class="finding-fix"><strong>Fix:</strong> añadir FR o nota en FR-082 con validación mínima — ej. "alerta si factor &gt; X% de la demanda esperada del periodo".</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">FR-014 hereda OQ-117 con formato del snapshot pendiente</h3>
+              <span class="finding-location">§8.2 FR-014 + §13 OQ-117</span>
+            </header>
+            <div class="finding-note">SLA de frescura cerrado (NFR-DAT-4 = 36h) pero el formato concreto del CSV de snapshot no está enunciado, lo que bloquea la implementación de la ingesta en <code>architecture.md</code>.</div>
+            <div class="finding-fix"><strong>Fix:</strong> enunciar formato propuesto como decisión arquitectónica concreta (CSV con encoding UTF-8 BOM o cp1252, columnas mínimas declaradas) o tratarlo como decisión de <code>architecture.md</code> con bounds claras y dueño.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">FR-110 "compatible" sin criterio bit-a-bit operacional</h3>
+              <span class="finding-location">§8.12 FR-110</span>
+            </header>
+            <div class="finding-note">Aunque la fixture inmutable de Hugo (NFR-T-2) cubre el caso operacional, "compatible" como verbo no está definido a nivel bit. El PRD podría nombrar explícitamente qué cuenta como divergencia bloqueante (orden de columnas, formatos de celda, encoding, metadatos).</div>
+            <div class="finding-fix"><strong>Fix:</strong> añadir línea en FR-110: "compatible = idéntico estructuralmente al fixture firmado por Hugo (orden de columnas, formatos de celda, encoding XLSX)".</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Scope honesty</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>El PRD trata las omisiones como ciudadanas de primera. §11 tiene 16 sub-secciones de out-of-scope, cada una con justificación. §3-bis es una sección entera dedicada a documentar el dolor histórico del jefe que v1 NO ataca. Los <code>[ASSUMPTION]</code> tags se usan con discreción y precisión, y los <code>[OPEN: baseline a recolectar]</code> están todos rastreables a OQs. Las decisiones explícitamente firmadas con fecha (C-O2..C-O22, D-1..D-7) constituyen una bitácora embebida en el documento — que el <code>.decision-log.md</code> tenga 774 líneas y el PRD las refleje en su cuerpo es disciplina notable. Las contra-métricas en §6 son scope honesto en forma de operación. La honestidad epistémica añadida en §10.4 (post-F-03 del Validate anterior) — la admisión textual de que las mitigaciones de R-11 son "detección + escalamiento humano... ninguna es engineered mitigation" — es excepcional. Pocos PRDs nombran este nivel de honestidad sobre sus propias mitigaciones.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Downstream usability</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Este PRD es chain-top (alimenta <code>architecture.md</code> → UX → epics → stories), así que la dimensión pesa más. Glosario robusto (30+ entradas con las dos críticas nuevas, "uso interno" y "error de operador", bien diferenciadas). ID space coherente con eliminaciones explícitas marcadas con <code>~~strikethrough~~</code>. Cross-references referenciables (§3 nombra dolores que §8 atiende con FRs nominados; §6 cita FRs explícitamente; §7.6 acopla UJ-3-TB con FR-091..095). Donde se queda en <em>adequate</em>: OQ-106 quedó huérfana tras eliminar FR-015 (el histórico de mermas ya no se ingesta, pero la OQ sigue preguntando por su estructura); Comprador (Hugo, §7.3) sin UJ explícita; <code>SolicitusDeInsumosTodos.xlsx</code> aparece en el PRD pero no en <code>project-context.md</code> como input canónico — inconsistencia documentada pero no cerrada; uso textual de "merma" sigue mezclando coloquial vs técnico ("uso interno + error de operador") sin marca consistente.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">OQ-106 reformulada pero su objeto (estructura del histórico de mermas) ya no existe</h3>
+              <span class="finding-location">§13 OQ-106 + FR-015 eliminado</span>
+            </header>
+            <div class="finding-note">La OQ pregunta por la estructura de un histórico que el owner decidió no ingestar (parte 3 del decision log). Es OQ huérfana — la pregunta ya no aplica.</div>
+            <div class="finding-fix"><strong>Fix:</strong> re-reformular OQ-106 a "umbral residual estadístico sobre snapshot SIM + venta histórica + factores configurados", eliminando referencia al histórico; o cerrar como N/A y abrir OQ nueva para el umbral.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">Comprador (Hugo) sin UJ explícita</h3>
+              <span class="finding-location">§7.3 + §7.6</span>
+            </header>
+            <div class="finding-note">Persona definida pero handoff downstream no journey-modeled. Para <code>architecture.md</code> y UX, conviene tener el paso explícito de recepción del export — define la frontera del sistema con precisión.</div>
+            <div class="finding-fix"><strong>Fix:</strong> añadir UJ-4 "Recepción del export por el comprador" con 3-4 pasos (recibe correo → abre XLSX → verifica fixture → procesa OC en flujo actual fuera del sistema).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">SolicitusDeInsumosTodos.xlsx falta en project-context.md no resuelto</h3>
+              <span class="finding-location">§10.2</span>
+            </header>
+            <div class="finding-note">Inconsistencia con la fuente de verdad del proyecto documentada en el propio PRD pero no cerrada. <code>project-context.md</code> lista el inventario canónico de archivos en <code>docs/</code> pero no incluye este XLSX que ahora es contrato del export.</div>
+            <div class="finding-fix"><strong>Fix:</strong> actualizar <code>project-context.md</code> (vía <code>bmad-generate-project-context</code>) para incluirlo como archivo canónico, o documentar en este PRD que es input nuevo gobernado por el sistema.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">Drift glosario: uso coloquial vs técnico de "merma" inconsistente</h3>
+              <span class="finding-location">§14 + §3 D-merma-1 + §11.16 + R-3</span>
+            </header>
+            <div class="finding-note">El glosario aclara que "merma" se desdobla en dos componentes (uso interno + error de operador), pero el cuerpo del PRD sigue mezclando coloquial ("merma") con técnico sin marca consistente. Para UX que decidirá el wording de la UI, conviene una regla estricta.</div>
+            <div class="finding-fix"><strong>Fix:</strong> establecer regla — "merma" solo aparece entre comillas como término coloquial; el sistema y la UI usan "uso interno" / "error de operador" / "pérdida".</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Este PRD ajusta correctamente a su shape: multi-stakeholder B2B híbrido con MVP problem-solving. Tres tipos de usuario (jefe-stakeholder-externo, coordinador-actor-principal, comprador-stakeholder-downstream), tres modos de operación del actor principal, objetivo de "automatizar lo que ya se hace a mano" — no es greenfield innovation, es internal tool con UX que importa porque el coord pasa 9h/semana ahí. Las personas y UJs están bien dosificadas para el shape: tres personas (no doce), journeys AS-IS + TO-BE para los flujos críticos. Para chain-top que alimenta <code>architecture.md</code>: el PRD respeta la separación con disciplina — §10 entera dice explícitamente "no decide arquitectura — esa decisión es de <code>architecture.md</code>" y enumera dependencias técnicas, restricciones y OQs sin pre-decidir solución. Addendum A3.3 enumera "decisiones arquitectónicas implícitas en el PRD pendientes de validar" (RxJS debounce, bitácora inmutable como event sourcing, export bit-a-bit XLSX) — el PRD se autocensura proactivamente sobre dónde se metió sin querer en arquitectura. Eso es shape-awareness avanzada.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li><strong>ID continuity:</strong> FR-006, FR-007, FR-014, FR-054, FR-066, FR-074, FR-075 numerados consistentemente. Eliminaciones (~~FR-004~~, ~~FR-015~~, ~~FR-020-025~~, ~~FR-042~~, ~~FR-062~~, ~~FR-070-072~~, ~~FR-090~~, ~~NFR-E-2~~, ~~NFR-DAT-2~~, ~~C-3~~) preservadas con strikethrough. ID space saludable.</li>
+        <li><strong>Assumptions Index roundtrip:</strong> los <code>[ASSUMPTION]</code> inline están todos rastreables a OQs o métricas marcadas <code>[OPEN:]</code>. No vi <code>[ASSUMPTION]</code> huérfano.</li>
+        <li><strong>UJ persona linkage:</strong> UJ-1 ↔ Jefe (§7.1), UJ-2 ↔ Coordinador (§7.2), UJ-3-AS-IS/TB ↔ Coordinador + Jefe-externo (§7.6), UJ-2-TB ↔ Coordinador (§7.7). Sin floating UJs. Comprador (Hugo, §7.3) sin UJ explícita — marcado como Downstream finding.</li>
+        <li><strong>Cross-refs resueltos:</strong> C-9 ↔ FR-035 ↔ FR-080..085 ↔ §6 métricas; C-10 ↔ FR-091..095 ↔ §7.6 UJ-3-TB; FR-054 ↔ FR-095 ↔ §3 D-exc-5. Roundtrip limpio.</li>
+        <li><strong>Estado del documento:</strong> frontmatter <code>status: draft</code> correctamente puesto — los 3 bloqueos Reviewer Gate restantes (R-7, R-8, R-9) son acciones externas, no scope decisions, y el PRD lo declara. <strong>No promover a <code>final</code></strong> sin cerrar los 3 bloqueos externos, OQ-120 (mecanismo atribución), el hueco de FR-061 ("Excel capturado o ingresado") y el hueco de FR-066 (regla de carry-over).</li>
+        <li><strong>Reviewer Gate footer:</strong> la sección "Estado actual del PRD" al final del cuerpo documenta los 5 bloqueos cerrados / 3 abiertos con detalle.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: .claude/skills/bmad-prd/assets/prd-validation-checklist.md</span>
+        <span>PRD: _producto/planning-artifacts/prds/prd-insumos-odemas-2026-05-22/prd.md</span>
+        <span>Generated: 2026-05-26</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
