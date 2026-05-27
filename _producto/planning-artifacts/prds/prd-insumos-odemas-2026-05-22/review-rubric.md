@@ -1,90 +1,134 @@
 # PRD Quality Review — insumos-odemas
 
+**Fecha:** 2026-05-26b
+**Grade global:** **Good**
+**Conteo de hallazgos:** 0 Critical / 0 High / 4 Medium / 3 Low
+
+---
+
 ## Overall verdict
 
-Este es un PRD inusualmente honesto y bien argumentado para su etapa: la tesis (automatizar la consolidación distrital del coordinador, no atacar la causa raíz del dato sucio) está nombrada, las concesiones epistémicas están expuestas sin maquillaje (§10.4, §11.16, R-1, R-11 reconocen textualmente que el modelo (C) "vigila pero no previene" la divergencia que Winston nombró), y la reversa D-9 al factor único de pérdida está bien propagada en el cuerpo principal. Lo que está en riesgo es la **done-ness de los FR del motor** (FR-030..035, FR-040 mezclan condición verificable con decisiones diferidas a `architecture.md` sin criterio de aceptación propio) y la **scope honesty de cara a un go-live**: FR-066 paso 4 es un Open Question disfrazado de FR cerrado, y la densidad de open-items sobre dependencias de datos no confirmadas (D-8/D-10, OQ-124/OQ-125) sigue alta para un PRD que pretende destrabar arquitectura. Es un `draft` sólido que aún no debe leerse como green-light; los rastros del modelo dual viejo en glosario/ejemplos son cosméticos pero erosionan confianza en un chain-top.
+El PRD aguanta como documento de decisión maduro: tiene tesis explícita (consolidación distrital del coordinador, no el jefe), trade-offs firmados con honestidad epistémica poco común (la objeción de Winston sobre el modelo (C) se cita textual y no se disuelve, §10.4), y la ronda 2026-05-26b cerró limpiamente los tres High de Done-ness del Validate previo. Lo que está en riesgo no es el cuerpo del PRD sino su **changelog**: el pie de documento (§14 footer, líneas 912-944) quedó sin actualizar y ahora **contradice directamente las decisiones del cuerpo** — sigue diciendo que FR-066 está "pendiente de confirmación del owner", que las ventas vienen "desde Big Data/BigQuery", y que OQ-124/125/126 están abiertas, cuando el cuerpo ya las cerró. Es drift de severidad media (no afecta la lógica funcional, pero un lector que llegue al footer extrae la conclusión opuesta). El PRD es **candidato a `status: final`** una vez saneado ese footer y reconocidos los bloqueos externos como out-of-band; no hay nada estructural pendiente en los FRs.
 
-## Decision-readiness — strong
+---
 
-El PRD trata sus decisiones como decisiones, no como "consideraciones". La concesión epistémica central de SIM está expuesta con una franqueza notable: §10.4 cita la objeción de Winston ("(C) coexistencia con doble captura es garantía de divergencia — dos sistemas, dos verdades, ningún ganador") y, en lugar de neutralizarla, el párrafo "Honestidad epistémica (post-F-03)" reconoce textualmente que "no es un riesgo distinto con nombre nuevo — es la misma objeción de Winston con etiqueta operacional" y que "ninguna [mitigación] es engineered mitigation… el modelo (C) no elimina la divergencia… la vigila". Eso es exactamente lo que pide esta dimensión: el trade-off nombrado con lo que se cede, no solo lo que se elige. R-1 y R-11 refuerzan la misma postura sin suavizarla.
+## 1. Decision-readiness — **strong**
 
-Las contra-métricas de §6 (divergencia SIM vs venta > 10% MoM, override > 50% post-calibración, pedidos urgentes > 15% MoM) son señales reales de fallo, no adornos. Los trade-offs de scope (jefe fuera de v1, TFS solo histórico, conteo asistido eliminado) están enmarcados con el costo aceptado, no como ganancias gratis.
+El PRD decide y lo admite. Las decisiones grandes están nombradas como decisiones, no enterradas: modelo (C) de SIM (§10.4, OQ-103 cerrada), reversa del modelo dual al factor único (D-9), carry-over reducido a surfacing pasivo (D-13), ventas/ALLOC/TFS como reporte del owner (OQ-124/125). El trade-off de cada una nombra qué se cede: §10.4 "Honestidad epistémica" reconoce que el modelo (C) **no elimina** la divergencia que Winston nombró, la **vigila** — y que "ninguna [de las tres mitigaciones de R-11] es engineered mitigation". Eso es exactamente lo contrario de smoothear todo a neutral.
 
-El único punto que baja la nota de "perfecto" a "strong" sólido: FR-066 paso 4 introduce una regla de negocio con consecuencia financiera real (techo no acumula en carry-over) marcada `[CONFIRMAR CON OWNER]` — una decisión todavía abierta presentada dentro de un FR redactado como cerrado (ver Scope honesty).
-
-## Substance over theater — strong
-
-Poco relleno. Las tres personas (§7) son exactamente las que el producto necesita y cada una está justificada por su relación con el sistema, no por completitud: el coordinador es usuario interactivo, el comprador (Hugo) es consumidor downstream con función concreta (firma golden datasets, NFR-T-2), y el jefe de servicentro está marcado explícitamente como "**no es usuario del sistema en v1**" con justificación de por qué se documenta igual ("informar v2", "que el equipo de UX no pierda la perspectiva del extremo del flujo"). Esa etiqueta convierte lo que sería persona-theater en contexto deliberado y honesto — ver Shape fit.
-
-§4 "Por qué no Excel" es sustancia ganada, no furniture: distingue lo que Excel sí puede ("cálculo aritmético para una tienda", "tabla pivote para consolidar") de lo que rompe a escala (validación de 38 tiendas × N SKUs, trazabilidad, fail-loud), con la cuenta dura del statu quo. Los NFR llevan umbrales product-specific (NFR-E-4 bandeja < 3s; NFR-P-1 recálculo < 100 ms con `debounceTime(150)`; NFR-DAT-4 frescura del snapshot), no boilerplate de "el sistema debe ser escalable".
-
-## Strategic coherence — strong
-
-Hay tesis explícita y las features la sirven. La tesis: "El dolor v1 vive en el coordinador" (§3), y todo el cuerpo se ordena alrededor de eso — los objetivos O1-O4 están en orden de prioridad declarado, las capacidades C-1..C-12 mapean a dolores D-coord-* nombrados por código, y los dolores fuera de alcance (jefe) se aíslan en §3-bis con el argumento de que se atienden "solo indirectamente vía mejor forecast del coordinador". El MVP es coherentemente de tipo "problem-solving" (sustituir cálculo manual), no un catálogo de capacidades.
-
-Las métricas principales validan la tesis, no actividad: la métrica #1 es tiempo del coordinador (9h → <2h), que es precisamente lo que la tesis promete. El encuadre de 3 fases (Predicción / Inventario-solicitud / Rebajas-merma) da un arco de producto con v1 = Fase 1 claramente delimitado.
-
-El riesgo de coherencia que sí existe es menor pero real: §6 marca como `[OPEN]` los baselines de quiebre y sobre-inventario (O2) y el MAPE/WAPE (acoplado a R-7). La tesis financiera ("eliminar quiebres y sobre-inventario") tiene métricas declaradas pero sin baseline ni meta numérica cerrada — la tesis de tiempo está blindada, la tesis de inventario todavía no. Es honesto (lo marca), pero significa que dos de los cuatro objetivos no son aún medibles.
+Las Open Questions que siguen abiertas son genuinamente abiertas (OQ-108 cold-start, OQ-114 SIM sucio, OQ-123 umbral residual) y tienen dueño. Las cerradas se marcan CERRADA con fecha y decisión. R-11 está calificada "severidad: alta" sin maquillaje.
 
 ### Findings
-- **medium** Objetivos O2/O4 sin métrica cerrada mientras O1 sí (§6) — La métrica de tiempo del coordinador está cerrada (baseline 9h, meta <2h), pero quiebre, sobre-inventario, MAPE/WAPE y candidatos atípicos siguen `[OPEN: baseline a recolectar en pilotaje]`. Para un PRD con impacto financiero, dos de cuatro objetivos no son verificables hoy. *Fix:* aceptar explícitamente que O1 es el objetivo gateado para v1 y O2/O4 son objetivos de pilotaje-a-confirmar, o cerrar al menos una meta direccional (p. ej. rango de cobertura sano) con Finanzas antes de subir a `final`.
+- Ninguno que mueva el veredicto.
 
-## Done-ness clarity — thin
+## 2. Substance over theater — **strong**
 
-Esta es la dimensión más débil y la que más importa para el chain-top hacia historias. El problema no es vaguedad de adjetivos sueltos (el PRD evita en general "razonable"/"amigable"), sino que **varios FR del corazón del producto delegan su consecuencia verificable a `architecture.md` sin dejar un criterio de aceptación propio**.
-
-FR-035 y FR-034 son el caso más claro: ambos dicen que el factor de pérdida se aplica "como ajuste porcentual sobre la demanda de venta" pero cierran con "La opción técnica concreta de cómo se aplica es decisión de `architecture.md` (F-05)". Un ingeniero de historias no puede escribir un criterio de aceptación testeable para FR-035 sin saber si el 0.9% multiplica el output, ajusta el histórico, o entra como término aditivo — y el PRD nota que esa elección "afecta R-7 (MAPE)". FR-030 ("modelo estacional configurable (familia de modelos en Java puro definida en `project-context.md`)") no acota qué cuenta como "done": ¿qué modelo, qué error tolerado, qué pasa con tiendas < 12 meses (eso vive abierto en OQ-108)?
-
-En contraste, FR-040, FR-051 y FR-054 sí están bien aterrizados: FR-040 da la fórmula completa de cantidad sugerida con cada término definido y resuelve `buffer_seguridad` (1 semana de cobertura, configurable); FR-051 operacionaliza "riesgo de quiebre" como "cobertura post-recorte ≥ 2 semanas" con orden de priorización; FR-054 da la fórmula `techo − compras_esporádicas`. Estos demuestran que el autor sabe escribir un FR con consecuencia verificable — por eso la inconsistencia con FR-030..035 destaca.
-
-FR-066 paso 4 falla en done-ness por otra vía: la regla está enunciada con fórmula (`presupuesto_disponible_N+1 = techo_semanal_N+1 − compras_esporádicas`) pero etiquetada `[CONFIRMAR CON OWNER]`, así que su "done" es condicional a una decisión no tomada.
+No hay relleno. Tres personas exactas (Jefe / Coordinador / Comprador), cada una con función declarada: el Jefe se mantiene **explícitamente como no-usuario** y el PRD justifica por qué se conserva ("mantener visibilidad del actor… informar v2", §7.1) en lugar de fingir que es usuario. La sección §4 "Por qué no Excel" es una defensa de tesis real, no innovation theater — responde a la objeción que de hecho recibió ("esto se podría hacer en Excel") con la cuenta dura. Los NFR llevan umbrales product-specific (NFR-E-3 ~8,600 series, NFR-DAT-4 36h, NFR-E-4 <3s, NFR-P-1 <100ms), no boilerplate "debe ser escalable".
 
 ### Findings
-- **high** FR-035 / FR-034 delegan la mecánica del factor a arquitectura sin criterio de aceptación propio (§8.4, FR-034/FR-035) — "La opción técnica concreta de cómo se aplica es decisión de `architecture.md` (F-05)". El motor de pérdida es central a O4 y el propio PRD dice que la elección "afecta R-7 (MAPE)"; sin acotar el modo de aplicación, una historia downstream no tiene condición testeable. *Fix:* dejar que arquitectura elija la implementación, pero fijar en el FR la consecuencia observable (p. ej. "para una tienda con venta esperada V y factor f, la demanda ajustada cumple `demanda = V × (1+f)` antes de cuantización; el trazo declara V, f, nivel y resultado"), de modo que el criterio de aceptación exista independiente del método interno.
-- **high** FR-030 no acota "done" del forecast (§8.4, FR-030) — "modelo estacional configurable (familia de modelos en Java puro…)" no define qué resultado verificar ni cómo se comporta con tiendas de < 12 meses (abierto en OQ-108). Es el FR más cargado de valor y el menos verificable. *Fix:* añadir criterio de aceptación basado en el backtesting (NFR-T-5) — "el forecast produce una cantidad por tienda × SKU × ciclo cuya desviación vs YoY queda dentro del criterio acordado (R-7)" — y resolver o referir explícitamente el caso de tienda nueva como precondición de done.
-- **medium** FR-066 paso 4 es una regla financiera con done condicional (§8.7, FR-066) — la fórmula de presupuesto en carry-over está marcada `[CONFIRMAR CON OWNER]`; su criterio de aceptación depende de una decisión abierta. *Fix:* extraer la regla a un Open Question (OQ nueva) hasta confirmarla, o confirmarla y quitar el marcador; no dejar una regla con efecto en MXN como FR "cerrado" sin firma.
+- **low** Persona Comprador delgada como UJ (§7.3) — Hugo no tiene UJ propio, solo aparece como consumidor downstream. Es correcto para un stakeholder pasivo (ver Shape fit), pero conviene que el PRD diga una línea explícita "sin UJ por diseño" para que UX no lo busque. *Fix:* añadir nota "stakeholder pasivo, sin UJ" en §7.3.
 
-## Scope honesty — adequate
+## 3. Strategic coherence — **strong**
 
-La sección Out-of-scope (§11) hace trabajo real: 17 exclusiones, cada una justificada y muchas con su destino futuro (v1.1 / v2) y su FR-eliminado trazado (FR-004, FR-015, FR-020..025, FR-042, FR-062, FR-070..072, FR-090, NFR-E-2, NFR-DAT-2). Los `[ASSUMPTION]` están presentes donde corresponde (frecuencia de excepciones OQ-101, baselines de TFS, etc.). Los tachados de FR/NFR eliminados con razón inline son ejemplares para downstream — no hay des-scoping silencioso.
-
-Lo que baja la nota de `strong` a `adequate` es la **densidad de open-items relativa a las pretensiones del documento**. El PRD es `draft` y lo dice, pero el cierre (§14, líneas finales) lista como "bloqueos externos restantes" el spike Java (R-8), backtesting+baselines (R-9), sesión Finanzas (R-7) y la confirmación de fuentes RMS/BigQuery (R-12), y mantiene abiertas OQ-107/108/110/111/112/114/116/123/124/125/126. Para la dimensión donde más pesa — las **fuentes de datos productivas** — D-8 (ventas semanales) y D-10 (ALLOC/TFS) son decisiones firmadas que *dependen* de extracts no confirmados ("a confirmar con Fernando"). El PRD es honesto al marcarlo (R-12, OQ-124/OQ-125) pero el efecto neto es que la cadencia semanal —pilar del motor— se apoya en un input cuya existencia no está confirmada, con fallback de prorrateo "con error". Eso es scope honesty bien ejecutada en la forma, pero es un nivel de incertidumbre de datos que un lector debe entender como bloqueante de arquitectura, no como detalle.
-
-El FR-066 paso 4 también cuenta aquí: un open-item incrustado como FR en vez de declarado como OQ infla la apariencia de cierre.
+Hay tesis y el documento la sostiene end-to-end: *el dolor v1 vive en el coordinador, no en el jefe* (§3), y todo lo que sigue se ordena bajo ella — los cuatro objetivos (§5) están priorizados, los FRs eliminados (FR-004, FR-042, FR-062, FR-070..072, FR-090, FR-015, NFR-E-2, NFR-DAT-2) se tacharon **porque dejaron de servir a la tesis** (el jefe fuera, TFS no se decide, conteo asistido fuera), no por conveniencia. El encuadre de 3 fases (Predicción / Inventario / Rebajas) da un arco claro de qué entra a v1 y por qué. Las contra-métricas (§6) están nombradas y son señales reales de falla (override >50% post-calibración, divergencia SIM >10% m/m), no métricas de vanidad.
 
 ### Findings
-- **medium** Densidad de open-items sobre fuentes de datos vs. pretensión de destrabar arquitectura (§10.6, R-12, OQ-124/OQ-125) — el pilar de cadencia semanal (D-8) y el cálculo del pedido con tránsito (D-10) dependen de extracts RMS/BigQuery "a confirmar con Fernando", aún sin dueño/formato/SLA. Está marcado honestamente, pero es una dependencia de datos no confirmada bajo una decisión presentada como firmada. *Fix:* elevar la confirmación de la fuente semanal a precondición explícita de `architecture.md` y marcar D-8/D-10 como "firmadas condicionalmente a OQ-124/OQ-125"; documentar el umbral de error del fallback de prorrateo para que arquitectura sepa cuándo es inaceptable.
-- **low** Open-item disfrazado de FR cerrado (§8.7, FR-066 paso 4) — ya señalado en Done-ness; cuenta también como ruido de scope honesty porque infla el conteo de FR "cerrados". *Fix:* convertir a OQ hasta confirmación del owner.
+- **medium** Varias Success Metrics principales siguen sin baseline ni meta numérica (§6): tasa de quiebre `[OPEN: baseline]`, sobre-inventario `[OPEN: baseline]`, MAPE/WAPE `[OPEN: acordar con Finanzas]`, TFS registradas `[OPEN: meta]`. Es honesto (se declara "a recolectar en pilotaje") y consistente con R-7/R-9, pero significa que solo **una** métrica (tiempo del coordinador, 9h→<2h) es accionable hoy. Para un PRD que aspira a `final`, la tesis se valida con una sola vara. *Fix:* aceptable diferir si R-9 (recolección de baseline pre-go-live) queda como precondición explícita de pilotaje; ya lo está — basta señalar que la métrica de tiempo es la única gate v1.
 
-## Downstream usability — adequate
+## 4. Done-ness clarity — **strong** (era el flanco débil del Validate previo; los 3 High están cerrados)
 
-Para un chain-top esto importa, y el PRD lo soporta razonablemente. Hay glosario (§14) extenso; los IDs FR son estables y referenciados desde dolores, UJs y riesgos; los UJ nombran personas de §7 por etiqueta (UJ-1 jefe, UJ-2 coordinador, UJ-3 excepción). Las capacidades C-1..C-12 dan agrupación limpia para epics. El export (FR-110) declara contrato literal contra `SolicitusDeInsumosTodos.xlsx` y NFR-T-2/T-4 fijan fixture y contract testing — buen anclaje para historias.
+Esta era la dimensión floja en el Validate 2026-05-26 (Fair). La ronda b la elevó: los tres FRs señalados ahora llevan criterio de aceptación observable. FR-040 define `buffer_seguridad` (antes F-Done-1) y FR-051 define "riesgo de quiebre" operacionalmente (`cobertura post-recorte ≥ 2 semanas`, antes F-Done-2). El patrón fail-loud está enunciado por FR concreto, no como adjetivo.
 
-Lo que erosiona la usabilidad downstream son **rastros del modelo viejo y un par de inconsistencias internas** que un extractor automático arrastraría como verdad:
-
-1. El glosario de "Coordinador (de distrito)" (línea 884) todavía dice "rota guardia semanal para consolidación" — esto **contradice directamente** §2 y §7.2, que insisten en que la asignación es fija y la consolidación NO se rota ("Cada coordinador trabaja su distrito todas las semanas… la guardia rotativa aplica solo a tareas inter-distritales"). Un downstream que lea el glosario como autoridad modelará mal el rol.
-2. FR-101 muestra como ejemplo de cadena de bitácora "`original modelo X → Jefe Carlos 07:48: Y → Coord. Marco 09:12: aprobado`" — pero el jefe **no opera el sistema** (§7.1, FR-090 eliminado, glosario de Override), así que no puede ser actor en la bitácora. El ejemplo enseña un flujo imposible en v1.
-3. R-11 mitigación #1 dice "SLA de frescura… propuesta inicial **48h** máximo" mientras NFR-DAT-4 y OQ-117 dicen **36h** (24h + 12h buffer). Dos números para el mismo SLA.
-
-Ninguno bloquea por sí solo, pero en un chain-top de alto riesgo los tres son trampas para el extractor.
+Quedan pocos adjetivos sin acotar y son menores (ver findings).
 
 ### Findings
-- **high** Glosario de "Coordinador" contradice el modelo de rol del cuerpo (§14 glosario vs §2/§7.2) — el glosario dice "rota guardia semanal para consolidación"; el cuerpo dice asignación fija y consolidación no rotada. El glosario es la fuente que UX/arquitectura source-extraen. *Fix:* reescribir la entrada: "supervisa un distrito fijo asignado territorialmente; consolida su distrito todas las semanas; la guardia rotativa aplica solo a tareas inter-distritales y no la gobierna el sistema".
-- **medium** FR-101 ejemplo de bitácora incluye al "Jefe" como actor (§8.11, FR-101) — el jefe no opera el sistema en v1; el ejemplo enseña una cadena imposible y puede inducir un modelo de datos con actor "jefe". *Fix:* cambiar el ejemplo a actores reales de v1, p. ej. "`original modelo X → Coord. Marco 09:12: Y (override, razón) → aprobado`".
-- **medium** SLA de frescura del snapshot SIM con dos valores (§12 R-11 mitigación 1 = 48h vs §9.6 NFR-DAT-4 / OQ-117 = 36h) — número contradictorio para el mismo control. *Fix:* alinear R-11 a 36h (el valor endurecido y cerrado en NFR-DAT-4) y eliminar la "propuesta inicial 48h".
+- **low** "Ventana razonable que no bloquee la operación del miércoles" (NFR-E-3) y "rangos sanos" / "rango sano" (O2, §6 sobre-inventario) son adjetivos sin bound numérico. NFR-E-3 se rescata a sí mismo después con "<5 min", pero "rango sano de rotación" sigue colgado de R-7/Finanzas. *Fix:* marcar "rango sano" como `[OPEN: definir con Finanzas, R-7]` (ya implícito, hacerlo explícito en O2).
+- **low** FR-067 (dashboard pedido-vs-recibido) no tiene criterio de "done" explícito más allá de la descripción de columnas; para un FR nuevo es aceptable pero conviene una condición verificable (ej. "la brecha se resalta cuando recibido < pedido"). *Fix:* añadir una frase de aceptación a FR-067.
 
-## Shape fit — strong
+## 5. Scope honesty — **strong**
 
-El PRD acierta su forma. Es una herramienta interna multi-rol con motor de forecast y trazabilidad financiera, no un consumer product — y el documento la trata así: los UJ existen porque hay flujos operativos reales (consolidación semanal, excepción mid-cycle desdoblada en AS-IS/TO-BE), pero no se sobre-formaliza con personas decorativas ni journeys para roles que no operan. La decisión de documentar al jefe de servicentro como persona §7.1 **sin** convertirlo en usuario está justificada explícitamente y sirve a v2 (no es theater: la etiqueta "no es usuario del sistema en v1" lo deja inequívoco y el UJ-1 vive como AS-IS de contexto, además relegado al addendum). El comprador Hugo sin UJ propia es correcto para un consumidor downstream pasivo — forzarle un journey sería el over-formalizing que la rúbrica penaliza.
+Sección §11 "Out of scope" de 17 entradas, cada una justificada, es de las más honestas que se ven — incluye la concesión epistémica central nombrada como tal (§11.16: "v1 automatiza el efecto, no la causa raíz") y la cita a Dr. Quinn que la diagnosticó. Los `[ASSUMPTION: …]` están tagueados inline (frecuencia de excepciones, baseline TFS) y la mayoría tienen dueño/plan de medición. La densidad de open-items es alta pero **apropiada a un PRD que aún no es green-light-to-build** y que reconoce 3 bloqueos externos pendientes (R-7/R-8/R-9). De-scoping siempre explícito (FR tachados con razón y decisión-código).
 
-La constraint traceability (stack obligatorio, convenciones de datos, fail-loud) se delega correctamente a `project-context.md` sin re-litigar, y §10 separa con disciplina lo que el PRD expone de lo que arquitectura decide. La forma es la correcta y está ejecutada con criterio.
+### Findings
+- **medium** No hay un índice consolidado de `[ASSUMPTION]` al final (la rúbrica lo pide como roundtrip). Los assumptions viven inline (§2 frecuencia excepciones, §4 baseline TFS, OQ-101) pero no hay sección "Assumptions Index" que los liste. Para un PRD de este tamaño (946 líneas) eso dificulta el roundtrip. *Fix:* añadir un apéndice "Índice de supuestos" o confirmar que la convención del proyecto no lo exige.
+
+## 6. Downstream usability — **adequate** (bueno en lo funcional; arrastra drift de changelog)
+
+Este PRD es chain-top (alimenta architecture.md → stories), así que la dimensión pesa. Lo funcional está bien: Glosario completo y actualizado (§14), IDs FR contiguos con tachados visibles (no se reciclan números), cross-refs que resuelven (FR-035→FR-082→FR-084 cadena coherente, FR-054↔FR-095 acoplados explícitamente). Cada sección se sostiene sola vía términos del Glosario.
+
+Lo que baja el veredicto de strong a adequate es el **drift del changelog footer** (ver Mechanical notes — es donde más muerde porque architecture.md leerá ese footer como estado oficial).
+
+### Findings
+- **medium** El changelog footer (líneas 912-944) **contradice el cuerpo** en cuatro puntos tras la ronda b — ver detalle en Mechanical notes. Para downstream esto es el hallazgo de mayor impacto: un lector de architecture.md que confíe en el footer concluirá que FR-066 sigue abierto, que las ventas vienen de BigQuery (cuando OQ-124 cerró eso), y que OQ-124/125/126 están abiertas (cuando están cerradas en §13). *Fix:* reescribir el bloque footer para reflejar el estado 2026-05-26b (FR-066 cerrado por D-13; ventas/ALLOC/TFS = reporte del owner; OQ-124/125/126 cerradas; eliminar "Fernando ruta crítica" y "distinción BigQuery-lectura vs ML").
+
+## 7. Shape fit — **strong**
+
+La forma encaja con el producto. Es una herramienta interna multi-rol pero de un solo operador interactivo dominante (3 coordinadores idénticos en función) → el PRD usa shape de **capability spec** (12 áreas C-1..C-12, FRs densos) y lo complementa con UJs porque sí hay flujo humano relevante (consolidación semanal, excepción mid-cycle). No sobre-formaliza: el Jefe no recibe UJ TO-BE (correcto, no opera v1), el Comprador no recibe UJ (correcto, pasivo). Los UJs AS-IS/TO-BE están bien separados (UJ-3 explícitamente desdoblado AS-IS / TB). SMs son operacionales (tiempo, quiebre, override) no user-facing de consumo masivo — apropiado para tool interno.
+
+### Findings
+- Ninguno.
+
+---
+
+## Verificación explícita de los 3 High previos
+
+### High #1 (Done-ness) — FR-066 carry-over con `[CONFIRMAR CON OWNER]` → **CERRADO** (en el FR; ver drift residual)
+
+FR-066 (§8.7, línea 331) ahora se titula **"Surfacing pasivo de pedidos tardíos (sin regla de arrastre)"** y dice textual: *"v1 NO modela el carry-over como regla del sistema: no reinscribe automáticamente la tienda a otro ciclo, no recalcula ni traslada presupuesto, y no ejecuta una mecánica de arrastre con bitácora propia. El faltante de una tienda que no pidió se autocorrige de forma natural en el siguiente ciclo… El techo presupuestal sigue siendo semanal y rígido por tienda (sin acumulación ni pool)."* El tag `[CONFIRMAR CON OWNER]` y la "regla de presupuesto en carry-over" desaparecieron del FR; el propio FR cierra con *"Esta reducción cierra el finding high del Validate 2026-05-26 sobre el paso 4: ya no existe una regla de presupuesto en disputa."* OQ-118 (§13) registra la reversa (D-6 → D-13). **El High está cerrado en el cuerpo.**
+**Pero** el changelog footer (línea 944) todavía lista *"FR-066 paso 4 (confirmar regla de presupuesto en carry-over)"* como decisión pendiente, y la línea 920 dice *"FR-066 carry-over (high): regla enunciada, pendiente confirmación owner."* → drift residual capturado como hallazgo medium #6.2.
+
+### High #2 (Done-ness) — FR-035/FR-034 delegaban la mecánica del factor a architecture.md sin criterio propio → **CERRADO**
+
+FR-035 (§8.4, línea 300) ahora trae **criterio de aceptación observable**: *"para una tienda con demanda de venta esperada `V` (FR-030) y factor resuelto `f`, la demanda ajustada cumple `demanda_ajustada = V × (1 + f)` sobre la demanda de venta, antes de la conversión a insumo (FR-031) y la cuantización (FR-032); el trazo explicable (FR-034) declara V, f, el nivel del que provino f… y el resultado."* La delegación a architecture.md se acota correctamente a la **opción técnica interna** ("multiplicador sobre output, ajuste del histórico, etc."), dejando claro que *"el criterio de aceptación anterior es observable e independiente del método interno."* FR-034 complementa con el trazo explicable (qué campos expone). **El criterio de done es ahora testeable sin esperar a architecture.md. Cerrado.**
+
+### High #3 (Done-ness) — FR-030 no acotaba el "done" ni el comportamiento con tiendas < 12 meses → **CERRADO**
+
+FR-030 (§8.4, línea 295) ahora trae **"Criterio de aceptación (done)"**: *"para una tienda con ≥ 12 meses de histórico de ventas, el motor produce un valor de demanda esperada por tienda × SKU venta para el ciclo objetivo, acompañado del trazo de FR-034; el backtesting (BacktestingSuite.java) sobre histórico real produce la desviación vs ventas YoY usada como criterio de éxito (R-7/C-O40)."* Y el cold-start queda fail-loud y deferido: *"Tiendas con < 12 meses de histórico (cold-start): el tratamiento… queda abierto en OQ-108 (dueño: arquitectura); hasta resolverlo, una tienda sin histórico suficiente se marca explícitamente como 'sin sugerencia del motor' en la bandeja (fail-loud — no se inventa un número…)."* El comportamiento con <12 meses está **definido como conducta v1 observable** (marca "sin sugerencia", trato manual del coord), con la política fina deferida a OQ-108 sin que eso deje el FR sin criterio. **Cerrado.**
+
+---
+
+## Hallazgos nuevos introducidos por los cambios (por severidad)
+
+**Critical:** ninguno.
+
+**High:** ninguno.
+
+**Medium:**
+
+- **medium #6.1 — SMs sin baseline accionable (preexistente, no introducido):** ver Dimensión 3. Solo la métrica de tiempo es gate v1. Aceptable si R-9 queda como precondición de pilotaje.
+- **medium #6.2 — Drift del changelog footer post-ronda-b (INTRODUCIDO por la ronda):** líneas 912-944 no se actualizaron al cerrar OQ-124/125/126 y D-13. Cuatro contradicciones concretas con el cuerpo:
+  1. Línea 913 / 918: *"D-8 (ventas semanales desde Big Data/BigQuery)"* y *"ventas semanales desde BigQuery"* — **contradice** OQ-124 cerrada (§13, línea 855) y §10.6, que pusieron las ventas como **reporte del owner sin BigQuery**.
+  2. Línea 918 / 920 / 944: FR-066 *"pendiente de confirmación del owner"* / *"regla enunciada, pendiente confirmación owner"* — **contradice** FR-066 cerrado por D-13 (línea 331) y OQ-118 (línea 837).
+  3. Línea 942 / 944: *"R-12 (confirmar fuentes RMS/BigQuery con Fernando)"* y *"OQ-124/OQ-125 (fuentes BigQuery/RMS con Fernando)"* como pendientes — **contradice** OQ-124/125 cerradas (líneas 855-861) y R-12 reencuadrada a "reporte del owner" (línea 754), donde *"Fernando deja de ser ruta crítica"*.
+  4. Línea 918: *"D-11 (layout del reporte abierto, OQ-126)"* — **contradice** OQ-126 cerrada con Opción A (línea 863) y FR-110 (línea 388).
+  *Fix:* reescribir el bloque de cierre (912-944) para reflejar 2026-05-26b. Es el único hallazgo que toca downstream con fuerza.
+- **medium #6.3 — Sin Índice de supuestos consolidado:** ver Dimensión 5. Roundtrip de `[ASSUMPTION]` no verificable sin índice.
+- **medium #6.4 — OQ-121/OQ-122 marcadas "SUPERADA por D-9" pero conservadas en §13 (líneas 867-873):** correcto historiar, pero ambas siguen redactadas en presente como si fueran preguntas; conviene un encabezado "[HISTÓRICO]" para que no se relean como abiertas. Menor.
+
+**Low:**
+
+- **low #7.1** — Comprador sin UJ explícitamente declarado "por diseño" (§7.3) — ver Dim. 2.
+- **low #7.2** — Adjetivos sin bound: "ventana razonable", "rango sano de rotación" — ver Dim. 4.
+- **low #7.3** — FR-067 sin frase de aceptación verificable — ver Dim. 4.
+
+---
 
 ## Mechanical notes
 
-- **Drift de glosario (modelo dual → factor único):** el término "**factor de merma esperada**" (lenguaje del modelo dual) sobrevive en D-jefe-2 (línea 94), C-3 §8.3 (línea 289), §11.12 (línea 649) y OQ-114 opción (b) (línea 825), mientras el cuerpo nuevo usa "factor único de pérdida". OQ-114 opción (b) incluso propone "continuar usando factor de merma esperada como compensación" — terminología pre-D-9. Recomendado: normalizar a "factor único de pérdida" en todas las ocurrencias.
-- **Continuidad de IDs OQ:** OQ-121 y OQ-122 aparecen **después** de OQ-126 (líneas 872 y 876), fuera de orden numérico. No rompe referencias (ambas están cerradas/superadas) pero desordena la lectura. Recomendado: reubicar tras OQ-120 o anotar el salto.
-- **Cross-ref a hallazgos internos (F-NN, C-O-NN):** el PRD referencia "F-05", "F-Done-1/2", "F-16/F-17/F-18", "C-O2..C-O40" como si fueran identificadores estables, pero no hay índice que los resuelva dentro del PRD ni del addendum. Downstream no puede dereferenciarlos. Recomendado: o un mini-índice de findings/change-ordinals, o convertirlos en prosa.
-- **Roundtrip de Assumptions:** los `[ASSUMPTION]` están inline (OQ-101 frecuencia de excepciones, baselines de TFS §4, ventana de excepciones §2) pero **no hay un Índice de Assumptions** al final como la rúbrica espera. Para un chain-top conviene un índice consolidado. Severidad baja.
-- **D-IDs sin tabla de decisiones:** D-1, D-2, D-5..D-12 se citan por todo el documento (decisiones firmadas) pero no hay una tabla única que liste cada D-NN con su enunciado; están dispersas en notas de FR y en el cierre §14. Un Decision Log tabular ayudaría a downstream.
-- **Continuidad FR:** los rangos eliminados (FR-004, 015, 020-025, 042, 062, 070-072, 090) están todos tachados con razón inline — buena higiene. No se detectaron duplicados ni FR huérfanos referenciados.
-- **Secciones requeridas:** presentes y completas para los stakes (Visión, Contexto, Problema, Objetivos, Métricas con contra-métricas, Personas/UJ, FR por capacidad, NFR, Contexto técnico, Out-of-scope, Riesgos, Open Questions, Glosario).
+- **Glosario:** completo, actualizado a 2026-05-26b (entradas nuevas para Factor de pérdida, Tipo de papel, Fases 1/2/3, Dashboard de validación, Canal oficial, Cadencia del forecast, Carry-over actualizado). Sin drift de términos detectado en el cuerpo — "factor único de pérdida", "tipo de papel", "carry-over pasivo" usados consistentemente entre FRs, §6, §10.4 y §11.
+- **Continuidad de IDs:** FR-NNN contiguos con tachados visibles (FR-004, FR-015, FR-020..025/C-3, FR-042, FR-062, FR-070..072, FR-090 eliminados y marcados; no se reciclan números). NFR-E-2 y NFR-DAT-2 tachados. OQ-101..126 con saltos explicables (OQ-113-A/B, OQ-120/121/122 históricas). Sin duplicados ni cross-refs rotos detectados en el cuerpo.
+- **Cross-refs:** resuelven — FR-035→FR-082/FR-084 (cadena del factor), FR-054↔FR-095 (acople presupuesto/compra extraordinaria), FR-066→FR-061 (carry-over surfacing), R-1/R-11→§10.4/§11.16. Las referencias a OQ y D-codes en el cuerpo apuntan a entradas existentes.
+- **⚠️ Drift principal — changelog footer (912-944):** el único bloque desincronizado. Detallado en hallazgo medium #6.2. No es drift de glosario (case/plural) sino **drift de estado**: el footer narra la ronda anterior. Es el bloqueo cosmético-pero-importante para `status: final`.
+- **Assumptions Index roundtrip:** no hay índice; assumptions viven inline (medium #6.3).
+- **UJ persona linkage:** UJ-1 → Jefe (§7.1/§7.4, en addendum), UJ-2/UJ-2-TB → Coordinador (§7.2), UJ-3 AS-IS/TB → Coordinador territorial + Jefe como origen externo. Todos nombran persona definida. Sin UJ flotantes.
+
+---
+
+## ¿Candidato a `status: final`?
+
+**Sí, con un saneamiento previo no estructural.** El cuerpo del PRD (FRs, NFRs, riesgos, OQs, glosario) está en estado final: los 3 High de Done-ness cerrados, scope honesto, tesis coherente, criterios de aceptación testeables. **Lo que bloquea el ascenso a `final`:**
+
+1. **(Bloqueo de documento, fácil) Sanear el changelog footer (912-944)** para que no contradiga el cuerpo — hallazgo medium #6.2. Sin esto, downstream (architecture.md) lee estado obsoleto.
+2. **(Bloqueos externos, out-of-band — no del PRD) R-7 (sesión Finanzas, ya reencuadrado a no-bloqueante de tesis), R-8 (spike forecasting Java) y R-9 (baselines de quiebre/sobre-inventario + backtesting).** Estos son precondiciones de **pilotaje**, no de `final` del PRD — el propio PRD los declara como tareas paralelas/precondiciones de go-live, no de aprobación del documento. Pueden quedar como riesgos abiertos en un PRD `final`.
+
+Recomendación: aplicar el fix del footer (#6.2) y opcionalmente los 3 medium restantes; con eso el PRD asciende a `status: final` con los bloqueos externos reconocidos como gates de pilotaje, no de documento.
