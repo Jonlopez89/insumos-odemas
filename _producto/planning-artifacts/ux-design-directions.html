@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>insumos-odemas · Direcciones de diseño — Bandeja distrital</title>
+<style>
+  :root{
+    /* Tokens OD derivados (SUPUESTO — reconciliar con rebranding PDF) */
+    --od-red:#E4002B; --od-red-strong:#B00020;
+    --ink:#1A1A1A; --ink-2:#4A4A4A; --ink-3:#767676;
+    --line:#E0E0E0; --surface:#FFFFFF; --surface-2:#F5F5F5; --surface-3:#FAFAFA;
+    --ok:#1E7E34; --warn:#8A5A00; --warn-fill:#F4B400; --error:#B00020; --info:#0B5FA5;
+    --r:4px;
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--surface-2);color:var(--ink);
+    font-family:Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.4;}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+  /* App shell */
+  .brandbar{height:56px;background:var(--od-red);color:#fff;display:flex;align-items:center;
+    gap:16px;padding:0 16px;font-weight:700;letter-spacing:.3px;}
+  .brandbar .logo{background:#fff;color:var(--od-red);padding:2px 8px;border-radius:var(--r);font-size:13px;}
+  .brandbar .sp{flex:1;}
+  .brandbar .user{font-weight:500;font-size:13px;opacity:.95;}
+  .intro{max-width:1100px;margin:24px auto;padding:0 16px;}
+  .intro h1{font-size:24px;margin:0 0 4px;}
+  .intro p{color:var(--ink-2);margin:.3em 0;}
+  .warnbox{background:#FFF6E5;border:1px solid var(--warn-fill);border-radius:var(--r);
+    padding:10px 14px;color:var(--warn);font-size:13px;margin:14px 0;}
+  /* Tabs */
+  .tabs{display:flex;gap:8px;max-width:1100px;margin:18px auto 0;padding:0 16px;flex-wrap:wrap;}
+  .tab{padding:8px 14px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r) var(--r) 0 0;
+    cursor:pointer;font-weight:500;color:var(--ink-2);}
+  .tab[aria-selected="true"]{color:var(--od-red-strong);border-bottom-color:var(--surface);font-weight:700;
+    box-shadow:inset 0 -3px 0 var(--od-red);}
+  .panel{max-width:1100px;margin:0 auto 40px;padding:0 16px;}
+  .frame{background:var(--surface);border:1px solid var(--line);border-radius:0 var(--r) var(--r) var(--r);
+    overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .dirhead{padding:14px 16px;border-bottom:1px solid var(--line);}
+  .dirhead h2{margin:0 0 2px;font-size:17px;}
+  .dirhead .sub{color:var(--ink-3);font-size:13px;}
+  .hidden{display:none;}
+  /* Context bar (aggregates) */
+  .ctxbar{display:flex;gap:10px;padding:12px 16px;background:var(--surface-3);border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;min-width:120px;}
+  .card .k{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px;}
+  .card .v{font-size:18px;font-weight:700;}
+  .miniweek{margin-left:auto;color:var(--ink-2);font-size:13px;align-self:center;}
+  /* Matrix */
+  .mwrap{overflow:auto;}
+  table.mx{border-collapse:collapse;width:100%;font-size:13px;}
+  table.mx th,table.mx td{border:1px solid var(--line);padding:4px 8px;text-align:right;white-space:nowrap;}
+  table.mx thead th{background:var(--surface-2);position:sticky;top:0;z-index:2;font-weight:600;color:var(--ink-2);}
+  table.mx .tienda{position:sticky;left:0;background:var(--surface);text-align:left;z-index:3;min-width:190px;}
+  table.mx thead .tienda{z-index:4;}
+  tr:nth-child(even) td:not(.tienda){background:var(--surface-3);}
+  .sug{color:var(--ink-2);font-style:italic;}
+  .ovr{color:var(--ink);font-weight:700;}
+  .badge{display:inline-block;font-style:normal;font-weight:700;font-size:10px;background:#FDE7EA;color:var(--od-red-strong);
+    border-radius:10px;padding:0 6px;margin-left:4px;vertical-align:middle;}
+  .cell-focus{outline:2px solid var(--info);outline-offset:-2px;}
+  .oob{background:#FDECEC !important;}
+  /* tienda meta */
+  .tname{font-weight:600;}
+  .tmeta{font-size:11px;color:var(--ink-3);}
+  /* budget bar */
+  .bud{display:flex;align-items:center;gap:6px;margin-top:3px;}
+  .track{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;min-width:70px;}
+  .fill{height:100%;}
+  .fill.ok{background:var(--ok);} .fill.warn{background:var(--warn-fill);} .fill.err{background:var(--error);}
+  .budlbl{font-size:11px;font-weight:600;}
+  .budlbl.ok{color:var(--ok);} .budlbl.warn{color:var(--warn);} .budlbl.err{color:var(--error);}
+  /* status chip */
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:10px;padding:1px 8px;border:1px solid;}
+  .chip.lista{color:var(--ok);border-color:var(--ok);background:#EAF6EE;}
+  .chip.rev{color:var(--info);border-color:var(--info);background:#EAF2FA;}
+  .chip.cut{color:var(--warn);border-color:var(--warn-fill);background:#FFF6E5;}
+  .chip.cold{color:var(--ink-3);border-color:var(--line);background:var(--surface-2);}
+  .chip.carry{color:var(--od-red-strong);border-color:var(--od-red-strong);background:#FDE7EA;}
+  .ico{width:8px;height:8px;border-radius:50%;display:inline-block;background:currentColor;}
+  /* trace panel */
+  .split{display:flex;}
+  .split .mwrap{flex:1;}
+  .trace{width:300px;border-left:1px solid var(--line);background:var(--surface-3);padding:14px;font-size:12.5px;}
+  .trace h3{margin:0 0 8px;font-size:13px;color:var(--od-red-strong);}
+  .trace .row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line);}
+  .trace .k{color:var(--ink-3);} .trace .v{font-weight:600;}
+  .trace .reality{background:#EAF2FA;border:1px solid #BBD6F0;border-radius:var(--r);padding:8px;margin:8px 0;color:var(--info);}
+  .popover{position:relative;}
+  .pop{position:absolute;right:8px;top:30px;width:250px;background:#fff;border:1px solid var(--line);
+    border-radius:var(--r);box-shadow:0 4px 16px rgba(0,0,0,.16);padding:10px;font-size:12px;text-align:left;z-index:5;}
+  .toast{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:var(--r);
+    padding:8px 12px;font-size:12.5px;margin:10px 16px;}
+  .toast button{background:none;border:1px solid #777;color:#fff;border-radius:3px;padding:2px 8px;cursor:pointer;}
+  .saved{font-size:11px;color:var(--ink-3);padding:6px 16px;}
+  .section-h{background:#FDECEC;color:var(--od-red-strong);font-weight:700;font-size:12px;padding:6px 12px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .section-h.calm{background:#EAF6EE;color:var(--ok);}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;font-size:11.5px;color:var(--ink-2);border-top:1px solid var(--line);}
+  .eval{max-width:1100px;margin:0 auto 60px;padding:0 16px;}
+  .eval table{border-collapse:collapse;width:100%;font-size:13px;background:#fff;border:1px solid var(--line);}
+  .eval th,.eval td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+  .eval th{background:var(--surface-2);}
+</style>
+</head>
+<body>
+<div class="brandbar"><span class="logo">Office DEPOT</span> insumos-odemas <span class="sp"></span>
+  <span class="user">Carlos · Distrito Centro</span></div>
+
+<div class="intro">
+  <h1>Direcciones de diseño — Bandeja distrital (pantalla héroe)</h1>
+  <p>Tres direcciones para el micro-loop <strong>decidir por celda → aprobar por tienda</strong>
+     sobre la matriz <strong>tienda × SKU de insumo</strong>, en laptop 1366×768.</p>
+  <div class="warnbox">⚠️ Colores y tipografía son <strong>derivados (supuesto)</strong> alineados a Office Depot —
+     pendientes de reconciliar con el PDF de rebranding 2026. Datos ficticios para ilustrar.</div>
+</div>
+
+<div class="tabs" role="tablist">
+  <div class="tab" role="tab" aria-selected="true" onclick="show(0)">A · Hoja densa</div>
+  <div class="tab" role="tab" aria-selected="false" onclick="show(1)">B · Contexto guiado</div>
+  <div class="tab" role="tab" aria-selected="false" onclick="show(2)">C · Atención dirigida</div>
+</div>
+
+<!-- ============ DIRECCIÓN A — HOJA DENSA ============ -->
+<div class="panel" id="p0">
+  <div class="frame">
+    <div class="dirhead"><h2>A · Hoja densa</h2>
+      <div class="sub">Máxima densidad tipo Excel · chrome mínimo · trazo en popover al foco · ~20 filas visibles. Para velocidad pura del power-user.</div></div>
+    <div class="saved">✔ Guardado hace 3 seg · Semana 12 · 16–22 mar 2026 · 38 tiendas en ciclo</div>
+    <div class="mwrap">
+      <table class="mx num">
+        <thead><tr>
+          <th class="tienda">Tienda</th>
+          <th>Opalina 225g</th><th>Bond 75g</th><th>Cartulina</th><th>Couché 150g</th><th>Fotográfico</th>
+          <th>Costo / Techo</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="tienda"><span class="tname">28 · Polanco</span></td>
+            <td class="sug">18</td><td class="ovr">24<span class="badge">M</span></td><td class="sug">6</td><td class="sug">12</td><td class="sug">3</td>
+            <td><span class="budlbl ok">82% · $9,840</span></td></tr>
+          <tr><td class="tienda"><span class="tname">31 · Satélite</span></td>
+            <td class="sug">24</td><td class="sug">30</td><td class="sug">12</td><td class="ovr">8<span class="badge">M</span></td><td class="sug">6</td>
+            <td><span class="budlbl warn">96% · $11,520</span></td></tr>
+          <tr class="popover"><td class="tienda"><span class="tname">44 · Coyoacán</span></td>
+            <td class="sug cell-focus">12</td><td class="sug">18</td><td class="oob ovr">40<span class="badge">!</span></td><td class="sug">6</td><td class="sug">3</td>
+            <td><span class="budlbl err">108% · $13,000</span></td>
+            <div class="pop"><strong>Opalina 225g · Coyoacán</strong><br>
+              <span style="color:#0B5FA5">Vendió 12, 13, 15 últimas 3 sem ISO</span><br>
+              +0.9% pérdida · −3 ALLOC en tránsito<br><em>Espacio/F2 fija el panel</em></div></td></tr>
+          <tr><td class="tienda"><span class="tname">52 · Del Valle</span></td>
+            <td class="sug">9</td><td class="sug">15</td><td class="sug">6</td><td class="sug">12</td><td class="sug">3</td>
+            <td><span class="budlbl ok">71% · $8,520</span></td></tr>
+          <tr><td class="tienda"><span class="tname">63 · Lindavista</span></td>
+            <td class="sug">18</td><td class="sug">24</td><td class="sug">12</td><td class="sug">6</td><td class="sug">6</td>
+            <td><span class="budlbl ok">88% · $10,560</span></td></tr>
+          <tr><td class="tienda"><span class="tname">77 · Tláhuac</span> <span class="tmeta">&lt;12 meses</span></td>
+            <td colspan="5" style="text-align:left;color:#767676;font-style:italic;">Sin sugerencia del motor — aún aprendo esta tienda (captura manual)</td>
+            <td><span class="budlbl ok">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><span class="sug">12</span> sugerido</span>
+      <span><span class="ovr">24</span> <span class="badge">M</span> override</span>
+      <span><span class="badge">!</span> fuera de banda (±15%)</span>
+      <span><span class="ico" style="color:var(--ok)"></span> presupuesto OK</span>
+      <span><span class="ico" style="color:var(--warn-fill)"></span> cerca del techo</span>
+      <span><span class="ico" style="color:var(--error)"></span> excede</span>
+    </div>
+    <div class="toast">↶ Override aplicado: Opalina · Polanco 18→24 <button>Deshacer</button></div>
+  </div>
+</div>
+
+<!-- ============ DIRECCIÓN B — CONTEXTO GUIADO ============ -->
+<div class="panel hidden" id="p1">
+  <div class="frame">
+    <div class="dirhead"><h2>B · Contexto guiado</h2>
+      <div class="sub">Barra de agregados del distrito + panel de trazo semi-fijo a la derecha. Más andamiaje, menos densidad. Para ciclos 1-3 y el coordinador escéptico.</div></div>
+    <div class="ctxbar">
+      <div class="card"><div class="k">Presupuesto consumido</div><div class="v num">84%</div></div>
+      <div class="card"><div class="k">Pendientes</div><div class="v num">5</div></div>
+      <div class="card"><div class="k">Carry-over</div><div class="v num">2</div></div>
+      <div class="card"><div class="k">Costo consolidado</div><div class="v num">$312,400</div></div>
+      <div class="miniweek">Semana 12 · 16–22 mar 2026 · ✔ Guardado hace 3 seg</div>
+    </div>
+    <div class="split">
+      <div class="mwrap">
+        <table class="mx num">
+          <thead><tr><th class="tienda">Tienda</th><th>Opalina</th><th>Bond</th><th>Cartulina</th><th>Estado · Presupuesto</th></tr></thead>
+          <tbody>
+            <tr><td class="tienda"><span class="tname">28 · Polanco</span><div class="bud"><span class="track"><span class="fill ok" style="width:82%"></span></span><span class="budlbl ok">82%</span></div></td>
+              <td class="sug">18</td><td class="ovr">24<span class="badge">M</span></td><td class="sug">6</td>
+              <td><span class="chip lista"><span class="ico"></span>Lista</span></td></tr>
+            <tr><td class="tienda"><span class="tname">31 · Satélite</span><div class="bud"><span class="track"><span class="fill warn" style="width:96%"></span></span><span class="budlbl warn">96%</span></div></td>
+              <td class="sug cell-focus">24</td><td class="sug">30</td><td class="sug">12</td>
+              <td><span class="chip rev"><span class="ico"></span>En revisión</span></td></tr>
+            <tr><td class="tienda"><span class="tname">44 · Coyoacán</span><div class="bud"><span class="track"><span class="fill err" style="width:100%"></span></span><span class="budlbl err">108%</span></div></td>
+              <td class="sug">12</td><td class="sug">18</td><td class="oob ovr">40<span class="badge">!</span></td>
+              <td><span class="chip cut"><span class="ico"></span>Recorte sugerido</span></td></tr>
+            <tr><td class="tienda"><span class="tname">77 · Tláhuac</span><div class="tmeta">&lt;12 meses de histórico</div></td>
+              <td colspan="3" style="text-align:left;color:#767676;font-style:italic;">Sin sugerencia del motor</td>
+              <td><span class="chip cold"><span class="ico"></span>Cold-start</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="trace">
+        <h3>¿Por qué 24? · Opalina · Satélite</h3>
+        <div class="reality">Esta tienda vendió <strong>22, 24, 25</strong> cajas las últimas 3 semanas ISO equivalentes.</div>
+        <div class="row"><span class="k">Demanda de venta</span><span class="v num">23 cajas</span></div>
+        <div class="row"><span class="k">Factor pérdida (Opalina)</span><span class="v num">+0.9%</span></div>
+        <div class="row"><span class="k">− ALLOC en tránsito</span><span class="v num">−3</span></div>
+        <div class="row"><span class="k">− Saldo SIM</span><span class="v num">−2</span></div>
+        <div class="row"><span class="k">Sugerido (cuantizado)</span><span class="v num">24 cajas</span></div>
+        <div class="row"><span class="k">= </span><span class="v num">144 piezas</span></div>
+        <div style="margin-top:10px;color:var(--ink-3)">Aceptar: <strong>Enter</strong> · Corregir: teclear + motivo</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DIRECCIÓN C — ATENCIÓN DIRIGIDA ============ -->
+<div class="panel hidden" id="p2">
+  <div class="frame">
+    <div class="dirhead"><h2>C · Atención dirigida</h2>
+      <div class="sub">La grilla agrupa por riesgo: "Requieren tu atención" (outliers) arriba expandido; "En rango" condensado abajo. El ojo va primero a lo que importa.</div></div>
+    <div class="saved">✔ Guardado hace 3 seg · Semana 12 · 16–22 mar 2026 · 4 requieren atención · 34 en rango</div>
+    <div class="section-h">▾ Requieren tu atención (4)</div>
+    <div class="mwrap">
+      <table class="mx num">
+        <thead><tr><th class="tienda">Tienda</th><th>SKU</th><th>Sugerido</th><th>Override</th><th>Motivo / Estado</th><th>Presupuesto</th></tr></thead>
+        <tbody>
+          <tr class="oob"><td class="tienda"><span class="tname">44 · Coyoacán</span></td><td style="text-align:left">Cartulina</td>
+            <td class="sug">12</td><td class="ovr">40<span class="badge">!</span></td>
+            <td style="text-align:left;color:var(--od-red-strong)">+233% — confirmación requerida</td>
+            <td><span class="budlbl err">108%</span></td></tr>
+          <tr><td class="tienda"><span class="tname">31 · Satélite</span></td><td style="text-align:left">— (total)</td>
+            <td colspan="2" style="text-align:left;color:var(--warn)">Cerca del techo presupuestal</td>
+            <td style="text-align:left"><span class="chip cut"><span class="ico"></span>Revisar recorte</span></td>
+            <td><span class="budlbl warn">96%</span></td></tr>
+          <tr><td class="tienda"><span class="tname">77 · Tláhuac</span></td><td style="text-align:left">todos</td>
+            <td colspan="2" style="text-align:left;color:var(--ink-3);font-style:italic">Sin sugerencia (cold-start)</td>
+            <td style="text-align:left"><span class="chip cold"><span class="ico"></span>Captura manual</span></td>
+            <td><span class="budlbl ok">—</span></td></tr>
+          <tr><td class="tienda"><span class="tname">19 · Tacuba</span></td><td style="text-align:left">— (no envió)</td>
+            <td colspan="2" style="text-align:left;color:var(--od-red-strong)">Carry-over de semana 11</td>
+            <td style="text-align:left"><span class="chip carry"><span class="ico"></span>Carry-over</span></td>
+            <td><span class="budlbl ok">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="section-h calm">▸ En rango (34) — aceptadas por el motor, listas para aprobar en lote ligero</div>
+    <div class="mwrap">
+      <table class="mx num">
+        <tbody>
+          <tr><td class="tienda"><span class="tname">28 · Polanco</span></td><td style="text-align:left;color:var(--ink-3)">5 SKUs dentro de banda</td><td><span class="budlbl ok">82%</span></td><td><span class="chip lista"><span class="ico"></span>Lista</span></td></tr>
+          <tr><td class="tienda"><span class="tname">52 · Del Valle</span></td><td style="text-align:left;color:var(--ink-3)">5 SKUs dentro de banda</td><td><span class="budlbl ok">71%</span></td><td><span class="chip lista"><span class="ico"></span>Lista</span></td></tr>
+          <tr><td class="tienda" style="color:var(--ink-3)">… 32 tiendas más</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EVALUACIÓN ============ -->
+<div class="eval">
+  <h2 style="font-size:18px">Marco de evaluación</h2>
+  <table>
+    <thead><tr><th>Criterio</th><th>A · Hoja densa</th><th>B · Contexto guiado</th><th>C · Atención dirigida</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Velocidad (power-user)</strong></td><td>★★★ máxima</td><td>★★ media</td><td>★★★ alta (lote en "en rango")</td></tr>
+      <tr><td><strong>Confianza (ciclos 1-3)</strong></td><td>★ baja (trazo escondido)</td><td>★★★ alta (trazo visible)</td><td>★★ media</td></tr>
+      <tr><td><strong>Densidad en 1366×768</strong></td><td>★★★ ~20 filas</td><td>★★ panel resta ancho</td><td>★★★ outliers + colapso</td></tr>
+      <tr><td><strong>Atención dirigida</strong></td><td>★ orden plano</td><td>★★ foco actualiza panel</td><td>★★★ riesgo arriba</td></tr>
+      <tr><td><strong>Tono institucional OD</strong></td><td>★★ sobrio</td><td>★★★ con contexto/respaldo</td><td>★★★ claro y guiado</td></tr>
+      <tr><td><strong>Riesgo "aprobado silencioso"</strong></td><td>alto (todo plano)</td><td>medio</td><td>bajo (separa riesgo de rutina)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+function show(i){
+  for(var k=0;k<3;k++){
+    document.getElementById('p'+k).classList.toggle('hidden',k!==i);
+    document.querySelectorAll('.tab')[k].setAttribute('aria-selected', k===i ? 'true':'false');
+  }
+}
+</script>
+</body>
+</html>
