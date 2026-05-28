@@ -1,0 +1,124 @@
+# generated: 2026-05-28
+# last_updated: 2026-05-28
+# project: insumos-odemas
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _producto/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-05-28
+last_updated: 2026-05-28
+project: insumos-odemas
+project_key: NOKEY
+tracking_system: file-system
+story_location: _producto/implementation-artifacts
+
+development_status:
+  # ──────────────────────────────────────────────────────────────────────
+  # Épica 1 — Fundación de la plataforma e ingesta de datos confiable
+  # ──────────────────────────────────────────────────────────────────────
+  epic-1: backlog
+  1-1-walking-skeleton-monorepo-cicd: backlog
+  1-2-persistencia-base-flyway-bitacora: backlog
+  1-3-auth0-scoping-territorial-mfa: backlog
+  1-4-logging-mdc-interceptor-problemdetail: backlog
+  1-5-catalogo-tiendas-crud-admin: backlog
+  1-6-catalogo-coordinadores-sync-auth0: backlog
+  1-7-catalogo-skus-insumo-tipos-papel: backlog
+  1-8-equivalencia-sku-venta-insumo-fail-loud: backlog
+  1-9-catalogo-eventos-comerciales: backlog
+  1-10-plumbing-ingesta-csv-encoding-patron: backlog
+  1-11-ingesta-presupuestos-tiendas: backlog
+  1-12-ingesta-archivos-canonicos-ventas-alloc-tfs-entrega-sim: backlog
+  epic-1-retrospective: optional
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Épica 2 — Motor de pronóstico y cálculo de la sugerencia de pedido
+  # ──────────────────────────────────────────────────────────────────────
+  epic-2: backlog
+  2-1-forecasting-engine-contrato-esqueleto-modulo-aislado: backlog
+  2-2-forecast-baseline-semanal-media-movil-cold-start: backlog
+  2-3-backtesting-suite-golden-fixtures-firmados: backlog
+  2-4-componente-estacional-eventos-comerciales: backlog
+  2-5-factor-perdida-jerarquico-tabla-resolver: backlog
+  2-6-conversion-venta-insumo-exclusion-fail-loud: backlog
+  2-7-cuantizacion-empaque-minimo-property-based: backlog
+  2-8-sugerencia-final-descuento-sim-alloc-tfs: backlog
+  2-9-validacion-presupuestal-recorte-sugerido: backlog
+  2-10-orquestador-batch-trigger-manual: backlog
+  2-11-gate-calidad-pit-jqwik-contrato-yaml: backlog
+  epic-2-retrospective: optional
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Épica 3 — Bandeja de consolidación distrital del coordinador
+  # ──────────────────────────────────────────────────────────────────────
+  epic-3: backlog
+  3-1-shell-bandeja-distrital-endpoint-sugerencias: backlog
+  3-2-pipes-formatters-locale-mx-frontend-shared: backlog
+  3-3-componente-trazo-forecast-reusable: backlog
+  3-4-grid-principal-ag-grid-virtual-scrolling: backlog
+  3-5-diferenciacion-sugerido-vs-override-bitacora-hover: backlog
+  3-6-override-razon-estructurada-recalculo-optimista: backlog
+  3-7-autosave-silencioso-indicador-google-docs: backlog
+  3-8-agregados-distrito-panel-lateral: backlog
+  3-9-estado-tienda-surfacing-pasivo-carry-over: backlog
+  3-10-aceptar-modificar-rechazar-recorte-sugerido: backlog
+  3-11-dashboard-pedido-vs-recibido: backlog
+  3-12-aprobacion-consolidado-distrital: backlog
+  3-13-export-xlsx-solicitus-de-insumos: backlog
+  3-14-exportar-bajo-demanda-envio-correo: backlog
+  3-15-panel-cambios-de-hoy-exportable-csv: backlog
+  epic-3-retrospective: optional
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Épica 4 — Bandeja territorial: excepciones, factor de pérdida y TFS
+  # ──────────────────────────────────────────────────────────────────────
+  epic-4: backlog
+  4-1-shell-bandeja-territorial-navegacion-secciones: backlog
+  4-2-configuracion-factor-perdida-tipo-papel: backlog
+  4-3-registrar-excepcion-midcycle: backlog
+  4-4-contexto-agregado-excepcion: backlog
+  4-5-decidir-registrar-respuesta-escalamiento-comprador: backlog
+  4-6-deteccion-estadistica-residual-candidatos: backlog
+  4-7-gestion-candidatos-residuales-capturar-descartar: backlog
+  4-8-historico-tfs-cruzado-registro-manual-emergencia: backlog
+  epic-4-retrospective: optional
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Épica 5 — Automatización y observabilidad operativa
+  # ──────────────────────────────────────────────────────────────────────
+  epic-5: backlog
+  5-1-cloud-scheduler-batch-motor-programacion: backlog
+  5-2-metricas-operacion-expuestas: backlog
+  5-3-dashboard-operacion-admin-facing: backlog
+  5-4-alertas-automaticas-administrador: backlog
+  5-5-cloud-scheduler-deteccion-residual-nocturna: backlog
+  epic-5-retrospective: optional
